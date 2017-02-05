@@ -2765,7 +2765,7 @@ class MercadoPago extends PaymentModule
         if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLB') {
             $postcode = str_replace('-', '', $postcode);
         } elseif (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLA') {
-            $postcode = Tools::substr($postcode, 1);
+            $postcode = preg_replace("/^(?:\D(\d\d\d\d))$/", "$1", $postcode);
         }
 
         error_log("======dimensions para enviar =====". Tools::jsonEncode($dimensions ));
