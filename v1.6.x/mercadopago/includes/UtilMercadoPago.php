@@ -39,8 +39,6 @@ class UtilMercadoPago
                 null,
                 true
             );
-        } else {
-            error_log($data_hora."===".$mensagem);
         }
     }
 
@@ -108,7 +106,7 @@ class UtilMercadoPago
                 WHERE width = 0 OR height = 0 OR depth = 0 OR weight = 0";
 
         $dados = Db::getInstance()->executeS($sql);
- 
+
         if ($dados) {
             $requirements['dimensoes'] = 'negative';
         } else {
@@ -119,5 +117,4 @@ class UtilMercadoPago
 
         return $requirements;
     }
-
 }

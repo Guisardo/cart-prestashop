@@ -31,7 +31,7 @@ include_once 'MPRestCli.php';
 
 class MPApi
 {
-    const VERSION = '3.3.9';
+    const VERSION = '3.4.1';
 
     /* Info */
     const INFO = 1;
@@ -141,9 +141,6 @@ class MPApi
 
         $result = MPRestCli::get($uri);
 
-
-        error_log("====result====".Tools::jsonEncode($result));
-
         return  $result;
     }
 
@@ -191,7 +188,7 @@ class MPApi
 
     /**
      * Get information for specific payment
-     *
+     * https://api.mercadolibre.com/shipments/$id_shipment?access_token='
      * @param int $id
      * @return array(json)
      */
@@ -283,6 +280,16 @@ class MPApi
     {
         $access_token = $this->getAccessTokenV1();
         $result = MPRestCli::get('/v1/payment_methods?access_token=' . $access_token);
+
+        if ($result['status'] != 200 || $result['status']  != 201) {
+            PrestaShopLogger::addLog(
+                'MercadoPago::getContent - Fatal Error: '.Tools::jsonEncode($result),
+                MPApi::WARNING,
+                0
+            );
+            return array();
+        }
+
         $result = $result['response'];
 
         // remove account_money
@@ -340,7 +347,6 @@ class MPApi
     {
         $access_token = $this->getAccessTokenV1();
         $trackingID = "platform:v1-whitelabel,type:prestashop,so:".MPApi::VERSION;
-        error_log("====ACCESS TOKEN ======".$access_token);
         $preference_result = MPRestCli::postTracking(
             '/v1/payments?access_token=' .
             $access_token,
@@ -422,8 +428,6 @@ class MPApi
         $access_token = $this->getAccessTokenV1();
         $uri = "/settings?access_token=".$access_token;
 
-        error_log("======url======".$uri);
-
         $result = MPRestCli::getConfig($uri);
         return $result;
     }
@@ -435,13 +439,11 @@ class MPApi
     public function setEnableDisableTwoCard($params)
     {
         $access_token = $this->getAccessTokenV1();
-        error_log("=====params two cards=====".$params);
 
         $params = array(
             "two_cards" => $params
         );
         $result = MPRestCli::putConfig("/settings?access_token=" . $access_token, $params);
-        error_log("=====result two cards=====".Tools::jsonEncode($result));
         return  $result;
     }
 
@@ -449,10 +451,7 @@ class MPApi
     {
         $access_token = $this->getAccessToken();
         $uri = "/users/test_user?access_token=" . $access_token;
-        error_log("====uri=====".$uri);
         $result = MPRestCli::post($uri, $siteID);
-
-        error_log("=====getTestUser======".Tools::jsonEncode($result));
 
         return $result;
     }

@@ -41,8 +41,6 @@ class MercadoPagoCustomPaymentModuleFrontController extends ModuleFrontControlle
 
         $response = $mercadopago->execPayment($_POST);
 
-        error_log("====retorno pagamento=====".Tools::jsonEncode($response));
-
         $order_status = null;
         if (array_key_exists('status', $response)) {
             switch ($response['status']) {
@@ -88,8 +86,6 @@ class MercadoPagoCustomPaymentModuleFrontController extends ModuleFrontControlle
             $percent = (float) Configuration::get('MERCADOPAGO_DISCOUNT_PERCENT');
             $id_cart_rule = null;
             if ($percent > 0) {
-                error_log("Entrou aqui percent====".$percent);
-
                 $id_cart_rule = $mercadopago->applyDiscount($cart, $payment_mode, $installments);
             }
 
@@ -153,7 +149,7 @@ class MercadoPagoCustomPaymentModuleFrontController extends ModuleFrontControlle
                 'version' => $mercadopago->getPrestashopVersion(),
                 'one_step' => Configuration::get('PS_ORDER_PROCESS_TYPE'),
             );
-
+            $data['expiration_date'] = '';
             if (array_key_exists('message', $response) && (strpos($response['message'], 'Invalid users involved') !==
                  false || (strpos($response['message'], 'users from different countries') !== false))) {
                 $data['valid_user'] = false;
@@ -170,10 +166,10 @@ class MercadoPagoCustomPaymentModuleFrontController extends ModuleFrontControlle
                     new Currency(Context::getContext()->cart->id_currency),
                     false
                 );
-                $data['payment_id'] = $response['payment_id'];
+                $data['payment_id'] = $response['id'];
                 $data['one_step'] = Configuration::get('PS_ORDER_PROCESS_TYPE');
                 $data['valid_user'] = true;
-                $data['message'] = $response['message'];
+                $data['message'] = isset($response['message']) ? $response['message'] : '';
             }
             $this->context->smarty->assign($data);
             $this->setTemplate('error.tpl');
