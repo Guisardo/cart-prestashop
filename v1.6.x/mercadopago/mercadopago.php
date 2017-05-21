@@ -317,7 +317,8 @@ class MercadoPago extends PaymentModule
             !$this->registerHook('displayBeforeCarrier')
             ||
             !$this->registerHook('displayFooter')
-
+            ||
+            !$this->registerHook('leftColumn')
             ) {
             return false;
         }
@@ -1167,6 +1168,14 @@ class MercadoPago extends PaymentModule
         $mp = new MPApi($client_id, $client_secret);
 
         return $mp->getAccessToken() ? true : false;
+    }
+
+    public function hookRightColumn($params)
+    {
+        if (!$this->active) {
+            return;
+        }
+        return $this->display(__file__, '/views/templates/hook/shipping_calculator.tpl');
     }
 
     public function hookDisplayHeader()
