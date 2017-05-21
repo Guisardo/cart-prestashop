@@ -35,7 +35,7 @@
 </style>
 <div>
     <div style="width: 220px; margin: 0 auto;">
-        <img src="https://cdn.pixabay.com/photo/2017/01/31/21/59/cap-2027575_960_720.png" style="width: 30px; float: left; margin-left: 7px;">
+        <img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/shipper.png" style="width: 30px; float: left; margin-left: 7px;">
         <ul style="text-align: right;">
             <li style="margin-right: -2px;">Costo total de envío a:
                 <input type="number" min="1000" max="9999" style="width: 40px; text-align: center;" placeholder="CP" title="Código Postal"></input>
@@ -50,7 +50,7 @@ Consultá tu Código Postal <u><a target="_blank" href="http://wxw.oca.com.ar/Co
 </li>
 </script>
 <script type="text/template" id="shippingOption">
-<li style="text-align: right;">{name}: {list_cost}</li>
+<li style="text-align: right;">[[name]]: [[list_cost]]</li>
 </script>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -71,9 +71,11 @@ $(document).ready(function(){
         if (_shippingOptions.destination) {
             $input.val(_shippingOptions.destination.zip_code);
             for (var i = 0; i < _shippingOptions.options.length; i++) {
-                $optionList.append(shippingOptionTpl.replace('{name}', _shippingOptions.options[i].name).replace('list_cost', _shippingOptions.options[i].list_cost));
+                $optionList.append(shippingOptionTpl.replace('[[name]]', _shippingOptions.options[i].name).replace('[[list_cost]]', _shippingOptions.options[i].list_cost));
             }
-            $input.focus();
+            if (_oldCP != '') {
+                $input.focus();
+            }
         } else {
             $input.val(_oldCP);
             $optionList.append(shippingCPATpl);

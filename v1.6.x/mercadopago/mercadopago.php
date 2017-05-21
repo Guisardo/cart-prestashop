@@ -318,7 +318,7 @@ class MercadoPago extends PaymentModule
             ||
             !$this->registerHook('displayFooter')
             ||
-            !$this->registerHook('leftColumn')
+            !$this->registerHook('displayProductButtons')
             ) {
             return false;
         }
@@ -1170,7 +1170,7 @@ class MercadoPago extends PaymentModule
         return $mp->getAccessToken() ? true : false;
     }
 
-    public function hookRightColumn($params)
+    public function hookDisplayProductButtons($params)
     {
         if (!$this->active) {
             return;

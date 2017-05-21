@@ -14,7 +14,7 @@ $mp = new MPApi(
         );
 
 $zip_code = $_GET['z'];
-if (Context::getContext()->customer->logged) {
+if (Context::getContext()->customer->logged && !$zip_code) {
     $cart = Context::getContext()->cart;
     if ($cart->id_address_invoice) {
         $address_invoice = new Address((integer) $cart->id_address_invoice);
