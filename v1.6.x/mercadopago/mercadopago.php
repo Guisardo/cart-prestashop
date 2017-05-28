@@ -319,6 +319,8 @@ class MercadoPago extends PaymentModule
             !$this->registerHook('displayFooter')
             ||
             !$this->registerHook('displayProductButtons')
+            ||
+            !$this->registerHook('actionUpdateQuantity')
             ) {
             return false;
         }
@@ -353,6 +355,24 @@ class MercadoPago extends PaymentModule
         FROM '._DB_PREFIX_.'order_history
         WHERE id_order =  '.(int) $id_order
         );
+    }
+
+    public function hookActionUpdateQuantity($params)
+    {
+        $pack_id = Db::getInstance()->Execute('SELECT ps_packcontent_updated('.$params['id_product'].')');
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$params['id_product']);
+        curl_exec($ch);
+        if (!is_null($pack_id)) {
+            curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$pack_id);
+            curl_exec($ch);
+        }
+        
+        curl_close($ch);
     }
 
     public function hookDisplayAdminOrder($params)
