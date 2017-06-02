@@ -361,8 +361,9 @@ class MercadoPago extends PaymentModule
     {
         $pack_id = Db::getInstance()->Execute('SELECT ps_packcontent_updated('.$params['id_product'].')');
 
+/*
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$params['id_product']);
@@ -371,8 +372,9 @@ class MercadoPago extends PaymentModule
             curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$pack_id);
             curl_exec($ch);
         }
-        
+
         curl_close($ch);
+*/
     }
 
     public function hookDisplayAdminOrder($params)
@@ -2131,7 +2133,8 @@ class MercadoPago extends PaymentModule
             throw new Exception($error);
         }
 
-        return $height.'x'.$width.'x'.$length.','.$weight;
+        //return $height.'x'.$width.'x'.$length.','.$weight;
+        return '30x30x30,1';
     }
 
     public function createStandardCheckoutPreference()
@@ -2768,7 +2771,8 @@ class MercadoPago extends PaymentModule
             //throw new Exception($error);
         }
 
-        $dimensions = $height.'x'.$width.'x'.$length.','.$weight;
+        //$dimensions = $height.'x'.$width.'x'.$length.','.$weight;
+        $dimensions = '30x30x30,1';
         if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLB') {
             $postcode = str_replace('-', '', $postcode);
         } /*elseif (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLA') {
@@ -2791,7 +2795,6 @@ class MercadoPago extends PaymentModule
             foreach ($shipping_options as $shipping_option) {
                 $value = $shipping_option['shipping_method_id'];
                 $shipping_speed = $shipping_option['estimated_delivery_time']['shipping'];
-
                 $return[$value] = array(
                     'name' => $shipping_option['name'],
                     'checked' => $shipping_option['display'],
@@ -2878,6 +2881,7 @@ class MercadoPago extends PaymentModule
             $retorno = $this->verifyCache($params, $this->id_carrier);
             $shipping_cost = (float) $retorno['cost'];
             if ($retorno != null) {
+                header('cost1: '.$shipping_cost);
                 return $shipping_cost;
             }
         }
@@ -2888,11 +2892,13 @@ class MercadoPago extends PaymentModule
     private function verifyCache($params, $id_carrier)
     {
         $cart = Context::getContext()->cart;
-        $products = $cart->getProducts();
-        $price_total = 0;
-        foreach ($products as $product) {
-            for ($qty = 0; $qty < $product['quantity']; ++$qty) {
-                $price_total += $product['price_wt'];
+        $price_total = 10;
+        if (!is_null($cart)) {
+            $products = $cart->getProducts();
+            foreach ($products as $product) {
+                for ($qty = 0; $qty < $product['quantity']; ++$qty) {
+                    $price_total += $product['price_wt'];
+                }
             }
         }
 
@@ -2930,21 +2936,23 @@ class MercadoPago extends PaymentModule
 
         // Init var
         $address = new Address($params->id_address_delivery);
-        $products = $cart->getProducts();
-        $mp = $this->mercadopago;
-
-        // pega medidas dos produtos
         $width = 0;
         $height = 0;
         $length = 0;
         $weight = 0;
-        foreach ($products as $product) {
-            for ($qty = 0; $qty < $product['quantity']; ++$qty) {
-                $price_total += $product['price_wt'];
-                $width  += $product['width'];
-                $height += $product['height'];
-                $length += $product['depth'];
-                $weight += $product['weight'] * 1000;
+        $mp = $this->mercadopago;
+
+        if (!is_null($cart)) {
+            $products = $cart->getProducts();
+            // pega medidas dos produtos
+            foreach ($products as $product) {
+                for ($qty = 0; $qty < $product['quantity']; ++$qty) {
+                    $price_total += $product['price_wt'];
+                    $width  += $product['width'];
+                    $height += $product['height'];
+                    $length += $product['depth'];
+                    $weight += $product['weight'] * 1000;
+                }
             }
         }
 
@@ -2959,7 +2967,8 @@ class MercadoPago extends PaymentModule
            // throw new Exception($error);
         }
 
-        $dimensions = $height.'x'.$width.'x'.$length.','.$weight;
+        //$dimensions = $height.'x'.$width.'x'.$length.','.$weight;
+        $dimensions = '30x30x30,1';
 
         $postcode = $address->postcode;
         if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLB') {
