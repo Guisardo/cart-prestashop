@@ -67,6 +67,10 @@ $(document).ready(function(){
         $shippingOptions = $(shippingOptionsTpl);
         $('.box-info-product').append($shippingOptions);
         var $input = $shippingOptions.find('input');
+        if (!('ontouchstart' in window)) {
+            $input.attr('type', 'text');
+            $input.attr('pattern', '\\d{4}');
+        }
         var $optionList = $shippingOptions.find('ul');
         if (_shippingOptions.destination) {
             $input.val(_shippingOptions.destination.zip_code);
