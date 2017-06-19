@@ -81,6 +81,9 @@ $(document).ready(function(){
             $optionList.append(shippingCPATpl);
         }
         var _keyUpTimeout = false;
+        $input.on('click', function () {
+            this.setSelectionRange(0, this.value.length);
+        });
         $input.on('keypress', function(e) {
             if(e.keyCode == 13)
             {
