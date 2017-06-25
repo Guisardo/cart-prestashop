@@ -374,16 +374,20 @@ class MercadoPago extends PaymentModule
     {
         $pack_id = Db::getInstance()->Execute('SELECT ps_packcontent_updated('.$params['id_product'].')');
 
-
+/*
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_TIMEOUT, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange=all');
+        curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$params['id_product']);
         curl_exec($ch);
+        if (!is_null($pack_id)) {
+            curl_setopt($ch, CURLOPT_URL, 'https://local.fotos.ropitas.com.ar/ml/list.php?stockChange='.$pack_id);
+            curl_exec($ch);
+        }
 
         curl_close($ch);
-
+*/
     }
 
     public function hookDisplayAdminOrder($params)
