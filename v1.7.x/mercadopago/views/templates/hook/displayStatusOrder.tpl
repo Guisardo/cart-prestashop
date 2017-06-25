@@ -9,19 +9,19 @@
     {if $payment_status == "approved"}
         <div class="alert alert-success">
             <button type="button" class="close" data-dismiss="alert">×</button>
-            O pagamento foi aprovado e creditado.
+            {l s='Thank you, your payment has been approved.' mod='mercadopago'}
         </div>
     {/if}
     {if $payment_status == "in_process"}
         <div class="alert alert-warning">
             <button type="button" class="close" data-dismiss="alert">×</button>
-            O pagamento está sendo analisado.
+            {l s='Thank you, your payment is being processed.' mod='mercadopago'}
         </div>
     {/if}
     {if $payment_status == "rejected"}
         <div class="alert alert-danger">
             <button type="button" class="close" data-dismiss="alert">×</button>
-            O pagamento foi recusado. Por favor tentes novamente.
+            {l s='Sorry, your payment was declined.' mod='mercadopago'}
         </div>
     {/if}
 

@@ -35,29 +35,11 @@ class UtilMercadoPago
                 $data_hora."===".$mensagem,
                 $nivel,
                 0,
-                null,
+                'MercadoPago',
                 null,
                 true
             );
         }
-    }
-
-    public static function setNamePaymentType($payment_type_id)
-    {
-        if ($payment_type_id == "ticket") {
-            $displayName = "Mercado Pago - ticket";
-        } elseif ($payment_type_id == "atm") {
-            $displayName = "Mercado Pago - ATM";
-        } elseif ($payment_type_id == "credit_card") {
-            $displayName = "Mercado Pago - Credit card";
-        } elseif ($payment_type_id == "debit_card") {
-            $displayName = "Mercado Pago - Debit card";
-        } elseif ($payment_type_id == "prepaid_card") {
-            $displayName = "Mercado Pago - Prepaid card";
-        } else {
-            $displayName = "Mercado Pago";
-        }
-        return $displayName;
     }
 
     public static function getPrestashopVersion()
@@ -103,7 +85,8 @@ class UtilMercadoPago
 
         $sql = "SELECT id_product
                 FROM "._DB_PREFIX_."product
-                WHERE width = 0 OR height = 0 OR depth = 0 OR weight = 0";
+                WHERE width = 0 OR height = 0 OR depth = 0 OR weight = 0 and
+                online_only = 0 and available_for_order = 1;";
 
         $dados = Db::getInstance()->executeS($sql);
 
@@ -116,5 +99,44 @@ class UtilMercadoPago
         $requirements['ssl'] = Configuration::get('PS_SSL_ENABLED') == 0 ? "negative" : "positive";
 
         return $requirements;
+    }
+
+    public static function checkValueNull($value)
+    {
+        if (is_null($value) || empty($value)) {
+            return "false";
+        }
+        return $value;
+    }
+
+    public static function getString($value)
+    {
+        if (is_null($value) || empty($value)) {
+            return "";
+        }
+        return $value;
+    }
+
+    public static function getOrderTotalMLC_MCO($value)
+    {
+        if (is_null($value) || empty($value)) {
+            return 0;
+        }
+        return strpos($value,".") ? (double)substr($value, 0, strpos($value,".")) : $value;
+    }
+
+
+    public static function getCodigoPostal($value) {
+        error_log('==getCodigoPostal===');
+        if (is_null($value) || empty($value)) {
+            return $value;
+        }
+        if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLB') {
+            $value = str_replace('-', '', $value);
+        } else if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLA') {
+            error_log('==postcode===' . preg_replace("/[^0-9,.]/", "", $value));
+            $value = preg_replace("/[^0-9,.]/", "", $value);
+        }
+        return $value;
     }
 }
