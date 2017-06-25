@@ -23,22 +23,12 @@
 *  International Registered Trademark & Property of MercadoPago
 *}
 <script type="text/template" id="shippingCalculator">
-<style>
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-</style>
 <div>
     <div style="width: 220px; margin: 0 auto;">
         <img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/shipper.png" style="width: 30px; float: left; margin-left: 7px;">
         <ul style="text-align: right; margin-right: 7px;">
             <li style="margin-right: -2px;">Costo total de envío a:
-                <input type="number" min="1000" max="9999" style="width: 40px; text-align: center;" placeholder="CP" title="Código Postal"></input>
+                <input type="text" style="width: 40px; text-align: center;" placeholder="CP" title="Código Postal"></input>
             </li>
         </ul>
     </div>
