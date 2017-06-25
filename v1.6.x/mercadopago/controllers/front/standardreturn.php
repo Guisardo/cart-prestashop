@@ -65,19 +65,29 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
 
                 $transaction_amounts += $payment_info['transaction_amount'];
 
-                if (isset($payment_info['payment_type']) && $payment_info['payment_type'] == 'credit_card') {
+                if (isset($payment_info['payment_type']) &&
+                    $payment_info['payment_type'] == 'credit_card' ||
+                    $payment_info['payment_type'] == 'account_money'
+                    ) {
                     $card_holder_names[] = isset($payment_info['card']['cardholder']['name'])
                     ? $payment_info['card']['cardholder']['name'] : '';
                     if (isset($payment_info['card']['last_four_digits'])) {
                         $four_digits_arr[] = '**** **** **** '.$payment_info['card']['last_four_digits'];
                     }
-                    $statement_descriptors[] = $payment_info['statement_descriptor'];
+                    $statement_descriptors[] = isset($payment_info['statement_descriptor']) ?
+                    $payment_info['statement_descriptor'] : ''  ;
                     $status_details[] = $payment_info['status_detail'];
                 }
             }
 
             if (Validate::isLoadedObject($cart)) {
-                $total = (double) number_format($transaction_amounts, 2, '.', '');
+                if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' || Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
+                    $total = (double) round($transaction_amounts);
+                    $total_ordem = UtilMercadoPago::getOrderTotalMLC_MCO($cart->getOrderTotal(true, Cart::BOTH));
+                } else {
+                    $total = (double) number_format($transaction_amounts, 2, '.', '');
+                    $total_ordem = $cart->getOrderTotal(true, Cart::BOTH);
+                }
                 $extra_vars = array(
                     '{bankwire_owner}' => $mercadopago->textshowemail,
                     '{bankwire_details}' => '',
@@ -96,9 +106,6 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
                         $order_status = 'MERCADOPAGO_STATUS_7';
                         break;
                 }
-
-                $order_id = $mercadopago->getOrderByCartId($cart->id);
-
                 if ($order_status != null) {
                     $result_merchant = $mercadopago_sdk->getMerchantOrder($merchant_order_id);
                     $merchant_order_info = $result_merchant['response'];
@@ -110,9 +117,15 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
                         $total += $cost_mercadoEnvios;
                     }
 
-                    if (!$order_id) {
-                        $displayName = UtilMercadoPago::setNamePaymentType($payment_types[0]);
+                    if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' || Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
+                        $total = $cart->getOrderTotal(true, Cart::BOTH);
+                    }
 
+                    $order_id = $mercadopago->getOrderByCartId($cart->id);
+
+                    error_log("====OrderExists====".$cart->OrderExists());
+                    if ($cart->OrderExists() == false) {
+                        $displayName = $mercadopago->setNamePaymentType($payment_types[0]);
                         $mercadopago->validateOrder(
                             $cart->id,
                             Configuration::get($order_status),
@@ -132,8 +145,9 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
 
                     $uri = __PS_BASE_URI__.'order-confirmation.php?id_cart='.$order->id_cart.'&id_module='.
                          $mercadopago->id.'&id_order='.$order->id.'&key='.$order->secure_key;
-                    $order_payments = $order->getOrderPayments();
 
+
+                    $order_payments = $order->getOrderPayments();
                     if ($order_payments == null || $order_payments[0] == null) {
                         $order_payments[0] = new stdClass();
                     }
@@ -144,11 +158,13 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
                     $uri .= '&payment_type='.implode(' / ', $payment_types);
                     $uri .= '&payment_method_id='.implode(' / ', $payment_method_ids);
                     $uri .= '&amount='.$total;
-                    if ($payment_info['payment_type'] == 'credit_card') {
+                    if ($payment_info['payment_type'] == 'credit_card' || $payment_info['payment_type'] == 'account_money') {
                         $uri .= '&card_holder_name='.implode(' / ', $card_holder_names);
                         $uri .= '&four_digits='.implode(' / ', $four_digits_arr);
                         $uri .= '&statement_descriptor='.$statement_descriptors[0];
                         $uri .= '&status_detail='.$status_details[0];
+
+                        $order_payments[0]->transaction_id = implode(' / ', $payment_ids);
                         $order_payments[0]->card_number = empty($four_digits_arr) ? '' :
                             implode(' / ', $four_digits_arr);
                         $order_payments[0]->card_brand = empty($payment_method_ids) ? '' :
@@ -156,6 +172,7 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
                         $order_payments[0]->card_holder = implode(' / ', $card_holder_names);
                     }
                     $order_payments[0]->save();
+
                     $order_payments = $order->getOrderPayments();
                     Tools::redirectLink($uri);
                 }
