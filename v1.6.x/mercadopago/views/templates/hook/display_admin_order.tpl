@@ -23,114 +23,114 @@
 	*  International Registered Trademark & Property of MercadoPago
 	*}
 	<script defer type="text/javascript"
-	src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/js/jquery.dd.js"></script>	
+	src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/js/jquery.dd.js"></script>
 	<div class="panel">
 
-			<div class="row">
-				<img class="logo_cupom" src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/payment_method_logo.png">
-			</div>
-			<br>
-			<br>
-			<div class="row">
-				<div class="col-md-12"> <span id="show_message" style="display: none;"> </span> </div>
-				<div class="col-md-12" style="display: none;" id="show_message_waiting">
-					<span class="alert alert-warning">Please waiting...</span>
-				</div>
-			</div>
-			<br>
-			<br>
-
-			<div class="row">
-				{if $statusOrder == "Pendente"}
-					<form action="{$cancel_action_url|escape:'htmlall':'UTF-8'}" method="post" id="frmCancelOrder">
-						<input type="hidden" name="token_form" id="token_form" value="{$token_form|escape:'htmlall':'UTF-8'}"/>
-						<input type="hidden" name="id_order" id="id_order"/>
-						<div class="col-md-4">
-							<button class="btn btn-primary"
-								value="{l s='Cancel the Order' mod='mercadopago'}"
-								type="button"
-								id="btoCancelOrder">
-									{l s='Cancel the Order' mod='mercadopago'}
-							</button>
-						</div>
-					</form>
-				{/if}
-			</div>
-			{if $showPoint == "true"}
-			<div class="col-sm-2 form-group">
-			    <label for="exampleInputEmail1">Point Mercado Pago</label>
-				<select name="pos_id" id="pos_id" class="form-control">
-					{html_options options=$pos_options}
-				</select>
-				<br>
-			</div>
-			<div class="form-group">
-				<img src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/mercadopago_point_2.jpg" alt="{l s='Pay with Mercado Pago' mod='mercadopago'}" alt="Point" width="200" height="150" class="img-responsive">
-			</div>
-			<div class="row">
-				<button type="button" name="payment_pos_action" id="payment_pos_action" class="btn btn-success">{l s='Send payment' mod='mercadopago'}</button>
-				<button type="button" name="payment_pos_get_action" id="payment_pos_get_action" class="btn btn-info">{l s='Get payment' mod='mercadopago'}</button>
-				<button type="button" name="payment_pos_cancel_action" id="payment_pos_cancel_action" class="btn btn-danger">{l s='Cancel payment' mod='mercadopago'}</button>
-			</div>
-			{/if}
-	<br>
-{if isset($status)}
-	<div id="formAddPaymentPanel" class="panel">
-		<div class="panel-heading">
-			<i class="icon-truck"></i>
-			MercadoEnvios - {l s='Track your delivery' mod='mercadopago'}
+		<div class="row">
+			<img class="logo_cupom" src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/payment_method_logo.png">
 		</div>
+		<br>
+		<br>
+		<div class="row">
+			<div class="col-md-12"> <span id="show_message" style="display: none;"> </span> </div>
+			<div class="col-md-12" style="display: none;" id="show_message_waiting">
+				<span class="alert alert-warning">Please waiting...</span>
+			</div>
+		</div>
+		<br>
+		<br>
 
-		{if $substatus == "ready_to_print"}
-			<p class="alert alert-warning">
-				{l s='Warning' mod='mercadopago'}
-				<strong>{l s='Tag ready to print' mod='mercadopago'}</strong><br>
-				<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-				<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
-				&nbsp;
-				<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-				<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
-			</p>
-		{else if $substatus == "printed"}
-			<p class="alert alert-success">
-				{l s='Warning' mod='mercadopago'}
-				<strong>{l s='Tag printed' mod='mercadopago'}</strong><br>
-				<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-				<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
-				&nbsp;
-				<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-				<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
-			</p>
-		{else}
-			<p class="alert alert-danger">
-				{l s='Warning' mod='mercadopago'}
-				<strong>{$substatus_description|escape:'htmlall':'UTF-8'}</strong><br>
-			</p>
+		<div class="row">
+			{if $statusOrder == "Pendente"}
+				<form action="{$cancel_action_url|escape:'htmlall':'UTF-8'}" method="post" id="frmCancelOrder">
+					<input type="hidden" name="token_form" id="token_form" value="{$token_form|escape:'htmlall':'UTF-8'}"/>
+					<input type="hidden" name="id_order" id="id_order"/>
+					<div class="col-md-4">
+						<button class="btn btn-primary"
+							value="{l s='Cancel the Order' mod='mercadopago'}"
+							type="button"
+							id="btoCancelOrder">
+								{l s='Cancel the Order' mod='mercadopago'}
+						</button>
+					</div>
+				</form>
+			{/if}
+		</div>
+		{if $showPoint == "true"}
+		<div class="col-sm-2 form-group">
+		    <label for="exampleInputEmail1">Point Mercado Pago</label>
+			<select name="pos_id" id="pos_id" class="form-control">
+				{html_options options=$pos_options}
+			</select>
+			<br>
+		</div>
+		<div class="form-group">
+			<img src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/mercadopago_point_2.jpg" alt="{l s='Pay with Mercado Pago' mod='mercadopago'}" alt="Point" width="200" height="150" class="img-responsive">
+		</div>
+		<div class="row">
+			<button type="button" name="payment_pos_action" id="payment_pos_action" class="btn btn-success">{l s='Send payment' mod='mercadopago'}</button>
+			<button type="button" name="payment_pos_get_action" id="payment_pos_get_action" class="btn btn-info">{l s='Get payment' mod='mercadopago'}</button>
+			<button type="button" name="payment_pos_cancel_action" id="payment_pos_cancel_action" class="btn btn-danger">{l s='Cancel payment' mod='mercadopago'}</button>
+		</div>
 		{/if}
-		 <ul>
-			<li>
-				<span><strong class="dark">{l s='Status of delivery' mod='mercadopago'}:</strong>&nbsp;</span>{$status|escape:'htmlall':'UTF-8'}
-			</li>
-			<li>
-				<span><strong class="dark">{l s='Status of tag' mod='mercadopago'}:</strong>&nbsp;</span>{$substatus_description|escape:'htmlall':'UTF-8'}
-			</li>
-			<li>
-				<span><strong class="dark">{l s='Type of shipment' mod='mercadopago'}:</strong>&nbsp;</span>{$name|escape:'htmlall':'UTF-8'}
-			</li>
-			<li>
-				<span><strong class="dark">{l s='Estimated handling limit' mod='mercadopago'}:</strong>&nbsp;</span>{$estimated_handling_limit|escape:'htmlall':'UTF-8'}
-			</li>
-			<li>
-				<span><strong class="dark">{l s='Estimated delivery' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery|escape:'htmlall':'UTF-8'}
-			</li>
-			<li>
-				<span><strong class="dark">{l s='Estimated delivery final' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery_final|escape:'htmlall':'UTF-8'}
-			</li>
-		</ul>
+		<br>
+{if isset($status)}
+		<div id="formAddPaymentPanel" class="panel">
+			<div class="panel-heading">
+				<i class="icon-truck"></i>
+				MercadoEnvios - {l s='Track your delivery' mod='mercadopago'}
+			</div>
 
-	</div>
+			{if $substatus == "ready_to_print"}
+				<p class="alert alert-warning">
+					{l s='Warning' mod='mercadopago'}
+					<strong>{l s='Tag ready to print' mod='mercadopago'}</strong><br>
+					<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
+					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
+					&nbsp;
+					<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
+					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
+				</p>
+			{else if $substatus == "printed"}
+				<p class="alert alert-success">
+					{l s='Warning' mod='mercadopago'}
+					<strong>{l s='Tag printed' mod='mercadopago'}</strong><br>
+					<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
+					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
+					&nbsp;
+					<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
+					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
+				</p>
+			{else}
+				<p class="alert alert-danger">
+					{l s='Warning' mod='mercadopago'}
+					<strong>{$substatus_description|escape:'htmlall':'UTF-8'}</strong><br>
+				</p>
+			{/if}
+			 <ul>
+				<li>
+					<span><strong class="dark">{l s='Status of delivery' mod='mercadopago'}:</strong>&nbsp;</span>{$status|escape:'htmlall':'UTF-8'}
+				</li>
+				<li>
+					<span><strong class="dark">{l s='Status of tag' mod='mercadopago'}:</strong>&nbsp;</span>{$substatus_description|escape:'htmlall':'UTF-8'}
+				</li>
+				<li>
+					<span><strong class="dark">{l s='Type of shipment' mod='mercadopago'}:</strong>&nbsp;</span>{$name|escape:'htmlall':'UTF-8'}
+				</li>
+				<li>
+					<span><strong class="dark">{l s='Estimated handling limit' mod='mercadopago'}:</strong>&nbsp;</span>{$estimated_handling_limit|escape:'htmlall':'UTF-8'}
+				</li>
+				<li>
+					<span><strong class="dark">{l s='Estimated delivery' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery|escape:'htmlall':'UTF-8'}
+				</li>
+				<li>
+					<span><strong class="dark">{l s='Estimated delivery final' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery_final|escape:'htmlall':'UTF-8'}
+				</li>
+			</ul>
+
+		</div>
 {/if}
-
+	</div>
 
 <!-- 			$.ajax({
 				type : "GET",
@@ -155,7 +155,7 @@
 	// function cancelOrder() {
 	// 	location.reload();
 	// }
-	// 
+	//
 
 	{if $statusOrder == "Pendente"}
 		$('#btoCancelOrder').click(function() {
