@@ -57,7 +57,12 @@ $(document).ready(function(){
         $shippingOptions = $(shippingOptionsTpl);
         $('.box-info-product').append($shippingOptions);
         var $input = $shippingOptions.find('input');
-        if (!('ontouchstart' in window)) {
+        if ((('ontouchstart' in window) && !/chrome/i.test(navigator.userAgent)) ||
+                /chrome.+mobile/i.test(navigator.userAgent)) {
+            $input.attr('type', 'number');
+            $input.attr('min', 1000);
+            $input.attr('max', 9999);
+        } else {
             $input.attr('type', 'text');
             $input.attr('pattern', '\\d{4}');
         }
@@ -86,8 +91,10 @@ $(document).ready(function(){
             }
         });
         $input.on('change keyup', function() {
+            $shippingOptions.find('img').removeClass('ld ld-wander-h x2');
             clearTimeout(_keyUpTimeout);
             if (this.value == '' || (1000 <= this.value && this.value <= 9999)) {
+                $shippingOptions.find('img').addClass('ld ld-wander-h x2');
                 _keyUpTimeout = setTimeout(delayedCheck, 1000);
             }
         });
