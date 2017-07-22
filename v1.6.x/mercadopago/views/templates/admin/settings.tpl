@@ -90,9 +90,12 @@
 		<p>
 			<strong>{l s='Installed Curl' mod='mercadopago'}:</strong><img class="logoCheck" src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/{$requirements.curl|escape:'htmlall':'UTF-8'}.png" width="20px;" height="20px">
 		</p>
+
+		{if $MERCADOENVIOS_ACTIVATE eq 'true'}
 		<p>
 			<strong>{l s='Dimensions of the product registered' mod='mercadopago'}:</strong> <img class="logoCheck" src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/{$requirements.dimensoes|escape:'htmlall':'UTF-8'}.png" width="20px;" height="20px">
 		</p>
+		{/if}
 		<p>
 			<strong>{l s='Installed SSL' mod='mercadopago'}:</strong><img class="logoCheck" src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/{$requirements.ssl|escape:'htmlall':'UTF-8'}.png" width="20px;" height="20px">
 		</p>
@@ -201,6 +204,7 @@
 		<a href="https://www.mercadopago.com/mco/account/credentials" target="_blank"><u>{l s='Colombia' mod='mercadopago'}</u></a> |
 		<a href="https://www.mercadopago.com/mlc/account/credentials" target="_blank"><u>{l s='Chile' mod='mercadopago'}</u></a> |
 		<a href="https://www.mercadopago.com/mlm/account/credentials" target="_blank"><u>{l s='Mexico' mod='mercadopago'}</u></a> |
+		<a href="https://www.mercadopago.com/mpe/account/credentials" target="_blank"><u>{l s='Peru' mod='mercadopago'}</u></a> |
 		<a href="https://www.mercadopago.com/mlv/account/credentials" target="_blank"><u>{l s='Venezuela' mod='mercadopago'}</u></a> |
 		<a href="https://www.mercadopago.com/mlu/account/credentials" target="_blank"><u>{l s='Uruguay' mod='mercadopago'}</u></a>
 	<form action="{$uri|escape:'htmlall':'UTF-8'}" method="post">
@@ -288,14 +292,14 @@
 				<div class="">
 					<input type="text" size="33" name="MERCADOPAGO_CREDITCARD_BANNER" value="{$creditcard_banner|escape:'htmlall':'UTF-8'}" />
 				</div>
-				<br/>
+				<!--<br/>
 				<label>{l s='New Checkout: ' mod='mercadopago'}</label>
 				<div class="">
 					<select name="MERCADOPAGO_CHECKOUT_2" id="checkout_2">
 						<option value="true">{l s='Yes' mod='mercadopago'}</option>
 						<option value="false" selected>{l s='No' mod='mercadopago'} </option>
 					</select>
-				</div>
+				</div>-->
 			</fieldset>
 			{foreach from=$offline_payment_settings key=offline_payment item=value}
 				<fieldset>
@@ -399,12 +403,11 @@
 						<ul>
 							<li><h3>{l s='Mercado Envios works only with Checkout Standard' mod='mercadopago'}</h3>
 							{if $country == 'MLA'}
-									<li><a target="_blank" href="https://www.mercadopago.com.ar/envios">Activa MercadoEnvíos</a></li>
-									<li>
-									Consulta los <a target="_blank" href="https://www1.oca.com.ar/ocaexpresspak/help/serviviosbasicos.asp">valores admitidos por OCA</a>.</li>
+									<li><h3><a target="_blank" href="https://www.mercadopago.com.ar/envios">Activa MercadoEnvíos</a></h3></li>
+									<li><h3>
+									Consulta los <a target="_blank" href="https://www1.oca.com.ar/ocaexpresspak/help/serviviosbasicos.asp">valores admitidos por OCA</a>.</h3> </li>
 							{/if}
 							{if $country == 'MLM'}
-								<ul>
 									<li>
 										<h3><a target="_blank" href="https://www.mercadopago.com.mx/envios">Activa MercadoEnvíos</a></h3>
 									</li>
@@ -532,8 +535,6 @@
 
 		if (document.getElementById("checkout_2")){
 			document.getElementById("checkout_2").value = "{$checkout_2|escape:'htmlall':'UTF-8'}";
-		} else {
-			document.getElementById("checkout_2").value = "false";
 		}
 
 		if (document.getElementById("coupon_active")){
@@ -560,7 +561,6 @@
 		if (document.getElementById("log_active")){
 			document.getElementById("log_active").value = "{$log_active|escape:'htmlall':'UTF-8'}";
 		}
-
 		if (document.getElementById("window_type")){
 			document.getElementById("window_type").value = "{$window_type|escape:'htmlall':'UTF-8'}";
 		}

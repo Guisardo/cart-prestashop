@@ -32,6 +32,11 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
     {
         parent::initContent();
         if (Tools::getIsset('collection_id') && Tools::getValue('collection_id') != 'null') {
+            PrestaShopLogger::addLog(
+                'MercadoPago :: standard - topic = '.Tools::getValue('collection_id'),
+                MPApi::INFO,
+                0
+            );
             // payment variables
             $payment_statuses = array();
             $payment_ids = array();
@@ -50,9 +55,11 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
             $mercadopago_sdk = $mercadopago->mercadopago;
 
             foreach ($collection_ids as $collection_id) {
+                PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::entrou no for===", MPApi::INFO, 0);
                 $result = $mercadopago_sdk->getPaymentStandard($collection_id);
-
+                error_log(print_r($result, true));
                 $payment_info = $result['response']['collection'];
+                PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::for==external_reference===".$payment_info['external_reference'], MPApi::INFO, 0);
                 $id_cart = $payment_info['external_reference'];
                 $cart = new Cart($id_cart);
                 $payment_statuses[] = $payment_info['status'];
@@ -81,12 +88,11 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
             }
 
             if (Validate::isLoadedObject($cart)) {
-                if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' || Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
+                if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' ||
+                    Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
                     $total = (double) round($transaction_amounts);
-                    $total_ordem = UtilMercadoPago::getOrderTotalMLC_MCO($cart->getOrderTotal(true, Cart::BOTH));
                 } else {
                     $total = (double) number_format($transaction_amounts, 2, '.', '');
-                    $total_ordem = $cart->getOrderTotal(true, Cart::BOTH);
                 }
                 $extra_vars = array(
                     '{bankwire_owner}' => $mercadopago->textshowemail,
@@ -117,63 +123,109 @@ class MercadoPagoStandardReturnModuleFrontController extends ModuleFrontControll
                         $total += $cost_mercadoEnvios;
                     }
 
-                    if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' || Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
+                    if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO' ||
+                        Configuration::get('MERCADOPAGO_COUNTRY') == 'MLC') {
                         $total = $cart->getOrderTotal(true, Cart::BOTH);
                     }
+                    $existOrderMercadoPago = $mercadopago->selectMercadoPagoOrder($id_cart);
+                    PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::existOrderMercadoPago=====".$existOrderMercadoPago, MPApi::INFO, 0);
+                    PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::OrderExists=====".$cart->OrderExists(), MPApi::INFO, 0);
 
+                    $status = new OrderState((int)Configuration::get($order_status), (int)$this->context->language->id);
+                    if (!Validate::isLoadedObject($status)) {
+                        PrestaShopLogger::addLog("====ERRRORRR 1=====", MPApi::INFO, 0);
+                        PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::ERROR order_status====", MPApi::INFO, 0);
+                    } else {
+                        PrestaShopLogger::addLog("====carregou o status 1=====", MPApi::INFO, 0);
+                    }
+                    PrestaShopLogger::addLog("====1=====", MPApi::INFO, 0);
+                    if (!$existOrderMercadoPago) {
+                        $mercadopago->insertMercadoPagoOrder($id_cart, 0, 0, $payment_status);
+                        PrestaShopLogger::addLog("====insert =====".$id_cart, MPApi::INFO, 0);
+                        PrestaShopLogger::addLog("====3=====", MPApi::INFO, 0);
+                        UtilMercadoPago::logMensagem(
+                            '=====MercadoPagoStandardReturnModuleFrontController::status===='.Configuration::get($order_status),
+                            MPApi::INFO
+                        );
+
+                       UtilMercadoPago::logMensagem(
+                            '=====MercadoPagoStandardReturnModuleFrontController::language===='.(int)$this->context->language->id,
+                            MPApi::INFO
+                        );
+
+                        try {
+                            $displayName = $mercadopago->setNamePaymentType($payment_types[0]);
+                            $customer = new Customer($cart->id_customer);
+                            $currentOrder = $mercadopago->validateOrder(
+                                $cart->id,
+                                Configuration::get($order_status),
+                                $total,
+                                $displayName,
+                                null,
+                                $extra_vars,
+                                $cart->id_currency,
+                                false,
+                                $customer->secure_key
+                            );
+                            error_log("====standard validateOrder::currentOrder===".$currentOrder);
+                            $mercadopago->insertMercadoPagoOrder($id_cart, $currentOrder, 1, $payment_status);
+                            UtilMercadoPago::logMensagem(
+                            '=====MercadoPagoStandardReturnModuleFrontController::validateOrder==currentOrder===='.$currentOrder,
+                            MPApi::INFO
+                        );
+                            PrestaShopLogger::addLog("====4=====", MPApi::INFO, 0);
+                        } catch (Exception $e) {
+                            PrestaShopLogger::addLog("====ERRRORRR 6=====", MPApi::INFO, 0);
+                            PrestaShopLogger::addLog("=====MERCADOPAGO_ERRO::validateOrder=====".$e->getMessage(), MPApi::ERROR, 0);
+                        }
+                    }
                     $order_id = $mercadopago->getOrderByCartId($cart->id);
 
-                    error_log("====OrderExists====".$cart->OrderExists());
-                    if ($cart->OrderExists() == false) {
-                        $displayName = $mercadopago->setNamePaymentType($payment_types[0]);
-                        $mercadopago->validateOrder(
-                            $cart->id,
-                            Configuration::get($order_status),
-                            $total,
-                            $displayName,
-                            null,
-                            $extra_vars,
-                            $cart->id_currency,
-                            false,
-                            $cart->secure_key
-                        );
-                    }
+                    PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::cart_id=====".$cart->id, MPApi::INFO, 0);
+                    PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::order_id=====".$order_id, MPApi::INFO, 0);
 
-                    $order_id = !$mercadopago->currentOrder ?
-                    Order::getOrderByCartId($cart->id) : $mercadopago->currentOrder;
                     $order = new Order($order_id);
 
                     $uri = __PS_BASE_URI__.'order-confirmation.php?id_cart='.$order->id_cart.'&id_module='.
                          $mercadopago->id.'&id_order='.$order->id.'&key='.$order->secure_key;
 
-
-                    $order_payments = $order->getOrderPayments();
-                    if ($order_payments == null || $order_payments[0] == null) {
-                        $order_payments[0] = new stdClass();
-                    }
-
-                    $order_payments[0]->transaction_id = Tools::getValue('collection_id');
                     $uri .= '&payment_status='.$payment_statuses[0];
                     $uri .= '&payment_id='.implode(' / ', $payment_ids);
                     $uri .= '&payment_type='.implode(' / ', $payment_types);
                     $uri .= '&payment_method_id='.implode(' / ', $payment_method_ids);
                     $uri .= '&amount='.$total;
-                    if ($payment_info['payment_type'] == 'credit_card' || $payment_info['payment_type'] == 'account_money') {
+
+                    if ($payment_info['payment_type'] == 'credit_card' ||
+                        $payment_info['payment_type'] == 'account_money') {
                         $uri .= '&card_holder_name='.implode(' / ', $card_holder_names);
                         $uri .= '&four_digits='.implode(' / ', $four_digits_arr);
                         $uri .= '&statement_descriptor='.$statement_descriptors[0];
                         $uri .= '&status_detail='.$status_details[0];
-
-                        $order_payments[0]->transaction_id = implode(' / ', $payment_ids);
-                        $order_payments[0]->card_number = empty($four_digits_arr) ? '' :
-                            implode(' / ', $four_digits_arr);
-                        $order_payments[0]->card_brand = empty($payment_method_ids) ? '' :
-                            implode(' / ', $payment_method_ids);
-                        $order_payments[0]->card_holder = implode(' / ', $card_holder_names);
                     }
-                    $order_payments[0]->save();
 
                     $order_payments = $order->getOrderPayments();
+                    if ($order_payments != null) {
+                        $order_payments[0]->transaction_id = Tools::getValue('collection_id');
+                        if ($payment_info['payment_type'] == 'credit_card' ||
+                            $payment_info['payment_type'] == 'account_money') {
+                            $uri .= '&card_holder_name='.implode(' / ', $card_holder_names);
+                            $uri .= '&four_digits='.implode(' / ', $four_digits_arr);
+                            $uri .= '&statement_descriptor='.$statement_descriptors[0];
+                            $uri .= '&status_detail='.$status_details[0];
+
+                            $order_payments[0]->transaction_id = implode(' / ', $payment_ids);
+                            $order_payments[0]->card_number = empty($four_digits_arr) ? '' :
+                                implode(' / ', $four_digits_arr);
+                            $order_payments[0]->card_brand = empty($payment_method_ids) ? '' :
+                                implode(' / ', $payment_method_ids);
+                            $order_payments[0]->card_holder = implode(' / ', $card_holder_names);
+                        }
+                        $returnSave = $order_payments[0]->save();
+                        PrestaShopLogger::addLog("=====MercadoPagoStandardReturnModuleFrontController::save=====".$returnSave, MPApi::INFO, 0);
+                    } else {
+                        PrestaShopLogger::addLog("=====MERCADOPAGO_ERRO::order_payments é nulo da order =====".$order->id, MPApi::ERROR, 0);
+                    }
+
                     Tools::redirectLink($uri);
                 }
             }
