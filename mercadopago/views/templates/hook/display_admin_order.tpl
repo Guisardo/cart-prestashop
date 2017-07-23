@@ -22,6 +22,7 @@
 	*  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 	*  International Registered Trademark & Property of MercadoPago
 	*}
+	{if $statusOrder != "" || $showPoint == "true" || isset($status)}
 	<script defer type="text/javascript"
 	src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/js/jquery.dd.js"></script>
 	<div class="panel">
@@ -246,3 +247,4 @@
 	{/if}
 
 </script>
+{/if}
