@@ -2617,7 +2617,7 @@ class MercadoPago extends PaymentModule
                         // check if is mercadopago
                         if ($order->module == "mercadopago" || $checkout == 'pos') {
                             $retorno = $this->getOrderStateApproved($id_order);
-                            if ($retorno) {
+                            if ($retorno || $order->current_state == Configuration::get('PS_OS_CANCELED')) {
                                 return;
                             }
                         } else {
