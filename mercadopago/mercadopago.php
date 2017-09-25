@@ -2613,7 +2613,8 @@ class MercadoPago extends PaymentModule
                      * external reference and states diferents
                      * the transaction approved cant to change the status, except refunded.
                      */
-                    if ($payment_status == 'cancelled' || $payment_status == 'rejected') {
+                    if ($payment_status == 'cancelled' || $payment_status == 'rejected' ||
+                        $payment_status == 'shipped' || $payment_status == 'delivered') {
                         // check if is mercadopago
                         if ($order->module == "mercadopago" || $checkout == 'pos') {
                             $retorno = $this->getOrderStateApproved($id_order);
@@ -2624,6 +2625,36 @@ class MercadoPago extends PaymentModule
                             return;
                         }
                     }
+                    // Load tracking info when shipped
+                    if ($payment_status == 'shipped') {
+                        $order_payments = $order->getOrderPayments();
+                        foreach ($order_payments as $order_payment) {
+                            $result = $this->mercadopago->getPayment($order_payment->transaction_id);
+                            if ($result['status'] == '404' || $result['status'] == '401') {
+                                $result = $this->mercadopago->getPaymentStandard($order_payment->transaction_id);
+
+                                $result_merchant = $this->mercadopago->getMerchantOrder(
+                                    $result['response']['collection']['merchant_order_id']
+                                );
+                            }
+                            if ($result['status'] == 200) {
+                                $payment_info = $result['response']['collection'];
+
+                                $id_mercadoenvios_service_code = $this->isMercadoEnvios($order->id_carrier);
+                                if ($id_mercadoenvios_service_code > 0) {
+                                    $merchant_order_id = $payment_info['merchant_order_id'];
+                                    $result_merchant = $this->mercadopago->getMerchantOrder($merchant_order_id);
+                                    $return_tracking = $this->setTracking(
+                                        $order,
+                                        $result_merchant['response']['shipments'],
+                                        true
+                                    );
+                                }
+                            }
+                            break;
+                        }
+                    }
+
                     $this->updateOrderHistory($order->id, Configuration::get($order_status));
 
                     // Cancel the order to force products to go to stock.
