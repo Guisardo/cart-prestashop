@@ -465,7 +465,7 @@ class MercadoPago extends PaymentModule
                         $return_tracking = $this->setTracking(
                             $order,
                             $result_merchant['response']['shipments'],
-                            false
+                            $order_carrier->tracking_number == ''
                         );
                         $tag_shipment = $this->mercadopago->getTagShipment(
                             $return_tracking['shipment_id']
@@ -482,8 +482,9 @@ class MercadoPago extends PaymentModule
                 }
                 break;
             }
+            $order_carrier = new OrderCarrier($id_order_carrier);
+            $data['tracking_number'] = $order_carrier->tracking_number;
         }
-
         $this->context->smarty->assign($data);
 
         return $this->display(__file__, '/views/templates/hook/display_admin_order.tpl');
@@ -586,97 +587,98 @@ class MercadoPago extends PaymentModule
     {
         $shipment_id = null;
         $retorno = null;
-        foreach ($shipments as $shipment) {
-            if ($shipment['shipping_mode'] != 'me2') {
-                continue;
-            }
-
-            $shipment_id = $shipment['id'];
-            $response_shipment = $this->mercadopago->getTracking($shipment_id);
-            $response_shipment = $response_shipment['response'];
-            $tracking_number = $response_shipment['tracking_number'];
-
-            if ($response_shipment['tracking_number'] != 'pending') {
-                $status = '';
-                switch ($response_shipment['status']) {
-                    case 'ready_to_ship':
-                        $status = $this->l('Ready to ship');
-                        break;
-                    default:
-                        $status = $response_shipment['status'];
-                        break;
+        if ($shipments) {
+            foreach ($shipments as $shipment) {
+                if ($shipment['shipping_mode'] != 'me2') {
+                    continue;
                 }
 
-                switch ($response_shipment['substatus']) {
-                    case 'ready_to_print':
-                        $substatus_description = $this->l('Tag ready to print');
-                        break;
-                    case 'printed':
-                        $substatus_description = $this->l('Tag printed');
-                        break;
-                    case 'stale':
-                        $substatus_description = $this->l('Unsuccessful');
-                        break;
-                    case 'delayed':
-                        $substatus_description = $this->l('Sending the delayed path');
-                        break;
-                    case 'receiver_absent':
-                        $substatus_description = $this->l('Missing recipient for delivery');
-                        break;
-                    case 'returning_to_sender':
-                        $substatus_description = $this->l('In return to sender');
-                        break;
-                    case 'claimed_me':
-                        $substatus_description = $this->l('Buyer initiates complaint and requested a refund.');
-                        break;
-                    default:
-                        $substatus_description = $response_shipment['substatus'];
-                        break;
+                $shipment_id = $shipment['id'];
+                $response_shipment = $this->mercadopago->getTracking($shipment_id);
+                $response_shipment = $response_shipment['response'];
+                $tracking_number = $response_shipment['tracking_number'];
+
+                if ($response_shipment['tracking_number'] != 'pending') {
+                    $status = '';
+                    switch ($response_shipment['status']) {
+                        case 'ready_to_ship':
+                            $status = $this->l('Ready to ship');
+                            break;
+                        default:
+                            $status = $response_shipment['status'];
+                            break;
+                    }
+
+                    switch ($response_shipment['substatus']) {
+                        case 'ready_to_print':
+                            $substatus_description = $this->l('Tag ready to print');
+                            break;
+                        case 'printed':
+                            $substatus_description = $this->l('Tag printed');
+                            break;
+                        case 'stale':
+                            $substatus_description = $this->l('Unsuccessful');
+                            break;
+                        case 'delayed':
+                            $substatus_description = $this->l('Sending the delayed path');
+                            break;
+                        case 'receiver_absent':
+                            $substatus_description = $this->l('Missing recipient for delivery');
+                            break;
+                        case 'returning_to_sender':
+                            $substatus_description = $this->l('In return to sender');
+                            break;
+                        case 'claimed_me':
+                            $substatus_description = $this->l('Buyer initiates complaint and requested a refund.');
+                            break;
+                        default:
+                            $substatus_description = $response_shipment['substatus'];
+                            break;
+                    }
+                    $estimated_delivery = new DateTime(
+                        $response_shipment['shipping_option']
+                        ['estimated_delivery_time']
+                        ['date']
+                    );
+                    $estimated_handling_limit = new DateTime(
+                        $response_shipment['shipping_option']
+                        ['estimated_handling_limit']
+                        ['date']
+                    );
+                    $estimated_delivery_final = new DateTime(
+                        $response_shipment['shipping_option']
+                        ['estimated_delivery_final']
+                        ['date']
+                    );
+                    $retorno = array(
+                        'shipment_id' => $shipment_id,
+                        'tracking_number' => $tracking_number,
+                        'name' => $response_shipment['shipping_option']['name'],
+                        'status' => $status,
+                        'substatus' => $response_shipment['substatus'],
+                        'substatus_description' => $substatus_description,
+                        'estimated_delivery' => $estimated_delivery->format('d/m/Y'),
+                        'estimated_handling_limit' => $estimated_handling_limit->format('d/m/Y'),
+                        'estimated_delivery_final' => $estimated_delivery_final->format('d/m/Y'),
+                        'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').
+                        htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__,
+                    );
+                    if ($update) {
+                        $id_order_carrier = $order->getIdOrderCarrier();
+                        $order_carrier = new OrderCarrier($id_order_carrier);
+                        $order_carrier->tracking_number = $tracking_number;
+                        $order_carrier->update();
+                    }
+                } else {
+                    $retorno = array(
+                        'shipment_id' => $shipment_id,
+                        'tracking_number' => '',
+                        'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').
+                        htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__,
+                    );
                 }
-                $estimated_delivery = new DateTime(
-                    $response_shipment['shipping_option']
-                    ['estimated_delivery_time']
-                    ['date']
-                );
-                $estimated_handling_limit = new DateTime(
-                    $response_shipment['shipping_option']
-                    ['estimated_handling_limit']
-                    ['date']
-                );
-                $estimated_delivery_final = new DateTime(
-                    $response_shipment['shipping_option']
-                    ['estimated_delivery_final']
-                    ['date']
-                );
-                $retorno = array(
-                    'shipment_id' => $shipment_id,
-                    'tracking_number' => $tracking_number,
-                    'name' => $response_shipment['shipping_option']['name'],
-                    'status' => $status,
-                    'substatus' => $response_shipment['substatus'],
-                    'substatus_description' => $substatus_description,
-                    'estimated_delivery' => $estimated_delivery->format('d/m/Y'),
-                    'estimated_handling_limit' => $estimated_handling_limit->format('d/m/Y'),
-                    'estimated_delivery_final' => $estimated_delivery_final->format('d/m/Y'),
-                    'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').
-                    htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__,
-                );
-                if ($update) {
-                    $id_order_carrier = $order->getIdOrderCarrier();
-                    $order_carrier = new OrderCarrier($id_order_carrier);
-                    $order_carrier->tracking_number = $tracking_number;
-                    $order_carrier->update();
-                }
-            } else {
-                $retorno = array(
-                    'shipment_id' => $shipment_id,
-                    'tracking_number' => '',
-                    'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').
-                    htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__,
-                );
             }
         }
-
         return $retorno;
     }
 
@@ -2614,7 +2616,8 @@ class MercadoPago extends PaymentModule
                      * the transaction approved cant to change the status, except refunded.
                      */
                     if ($payment_status == 'cancelled' || $payment_status == 'rejected' ||
-                        $payment_status == 'shipped' || $payment_status == 'delivered') {
+                        $payment_status == 'shipped' || $payment_status == 'delivered' ||
+                        $payment_status == 'refunded') {
                         // check if is mercadopago
                         if ($order->module == "mercadopago" || $checkout == 'pos') {
                             $retorno = $this->getOrderStateApproved($id_order);
