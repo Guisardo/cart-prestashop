@@ -23,7 +23,7 @@
 *  International Registered Trademark & Property of MercadoPago
 *}
 <script type="text/template" id="shippingCalculator">
-<div>
+<div class="shippingContainer">
     <div style="width: 220px; margin: 0 auto;">
         <img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/shipper.png" style="width: 30px; float: left; margin-left: 7px;">
         <ul style="text-align: right; margin-right: 7px;">
@@ -43,71 +43,109 @@ Consultá tu Código Postal <u><a target="_blank" href="http://wxw.oca.com.ar/Co
 <li style="text-align: right;">[[name]]: [[list_cost]]</li>
 </script>
 <script type="text/javascript">
-$(document).ready(function(){
+$(document).ready(function() {
     var shippingOptionsTpl = $('#shippingCalculator').text();
     var shippingCPATpl = $('#shippingCPA').text();
     var shippingOptionTpl = $('#shippingOption').text();
-    var $shippingOptions = false;
-    var updateShippingCost = function(_shippingOptions) {
-        var _oldCP = '';
-        if ($shippingOptions) {
-            _oldCP = $shippingOptions.find('input').val();
-            $shippingOptions.remove();
-        }
-        $shippingOptions = $(shippingOptionsTpl);
-        $('.box-info-product').append($shippingOptions);
-        var $input = $shippingOptions.find('input');
-        if ((('ontouchstart' in window) && !/chrome/i.test(navigator.userAgent)) ||
-                /chrome.+mobile/i.test(navigator.userAgent)) {
-            $input.attr('type', 'number');
-            $input.attr('min', 1000);
-            $input.attr('max', 9999);
-        } else {
-            $input.attr('type', 'text');
-            $input.attr('pattern', '\\d{4}');
-        }
-        var $optionList = $shippingOptions.find('ul');
-        if (_shippingOptions.destination) {
-            $input.val(_shippingOptions.destination.zip_code);
-            for (var i = 0; i < _shippingOptions.options.length; i++) {
-                $optionList.append(shippingOptionTpl.replace('[[name]]', _shippingOptions.options[i].name).replace('[[list_cost]]', _shippingOptions.options[i].list_cost));
+    var shippingCalculator = function ($calculator_parent) {
+        var $shippingOptions = false;
+        var updateShippingCost = function(_shippingOptions) {
+            var _oldCP = '';
+            if ($shippingOptions) {
+                _oldCP = $shippingOptions.find('input').val();
+                $shippingOptions.remove();
             }
-            if (_oldCP != '') {
-                $input.focus();
+            $shippingOptions = $(shippingOptionsTpl);
+            $calculator_parent.find('.shippingContainer').remove();
+            $calculator_parent.append($shippingOptions);
+            var $input = $shippingOptions.find('input');
+            if ((('ontouchstart' in window) && !/chrome/i.test(navigator.userAgent)) ||
+                    /chrome.+mobile/i.test(navigator.userAgent)) {
+                $input.attr('type', 'number');
+                $input.attr('min', 1000);
+                $input.attr('max', 9999);
+            } else {
+                $input.attr('type', 'text');
+                $input.attr('pattern', '\\d{4}');
             }
-        } else {
-            $input.val(_oldCP);
-            $optionList.append(shippingCPATpl);
+            var $optionList = $shippingOptions.find('ul');
+            if (_shippingOptions.destination) {
+                $input.val(_shippingOptions.destination.zip_code);
+                for (var i = 0; i < _shippingOptions.options.length; i++) {
+                    $optionList.append(shippingOptionTpl.replace('[[name]]', _shippingOptions.destination.state.name).replace('[[list_cost]]', _shippingOptions.options[i].list_cost));
+                }
+                if (_oldCP != '') {
+                    $input.focus();
+                }
+            } else {
+                $input.val(_oldCP);
+                $optionList.append(shippingCPATpl);
+            }
+            var _keyUpTimeout = false;
+            $input.on('click', function () {
+                this.setSelectionRange(0, this.value.length);
+            });
+            $input.on('keypress', function(e) {
+                if(e.keyCode == 13)
+                {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+            $input.on('change keyup', function(e) {
+                if (e.keyCode === 27 && $input.val() !== '') {
+                    $input.val('');
+                } else if (e.keyCode === 27 && $input.val() === '') {
+                    $.fancybox.close();
+                    return;
+                }
+                $shippingOptions.find('img').removeClass('ld ld-wander-h x2');
+                clearTimeout(_keyUpTimeout);
+                if (this.value == '' || (1000 <= this.value && this.value <= 9999)) {
+                    $shippingOptions.find('img').addClass('ld ld-wander-h x2');
+                    _keyUpTimeout = setTimeout(delayedCheck, 1000);
+                }
+            });
         }
-        var _keyUpTimeout = false;
-        $input.on('click', function () {
-            this.setSelectionRange(0, this.value.length);
-        });
-        $input.on('keypress', function(e) {
-            if(e.keyCode == 13)
-            {
-                event.preventDefault();
-                return false;
+        var delayedCheck = function() {
+            var _data = {};
+            if ($shippingOptions) {
+                _data.z = $shippingOptions.find('input').val();
             }
-        });
-        $input.on('change keyup', function() {
-            $shippingOptions.find('img').removeClass('ld ld-wander-h x2');
-            clearTimeout(_keyUpTimeout);
-            if (this.value == '' || (1000 <= this.value && this.value <= 9999)) {
-                $shippingOptions.find('img').addClass('ld ld-wander-h x2');
-                _keyUpTimeout = setTimeout(delayedCheck, 1000);
-            }
-        });
-    }
-    var delayedCheck = function() {
-        var _data = {};
-        if ($shippingOptions) {
-            _data.z = $shippingOptions.find('input').val();
+            $.getJSON('/modules/mercadopago/shipping.php', _data).success(function(resp) {
+                updateShippingCost(resp);
+            });
         }
-        $.getJSON('/modules/mercadopago/shipping.php', _data).success(function(resp) {
-            updateShippingCost(resp);
-        });
-    }
-    delayedCheck();
+        delayedCheck();
+    };
+    var shippingCalculatorFromHash = function () {
+        if (location.hash === '#shippingModal') {
+            $('<a href="#shippingModal" />').fancybox({
+                'autoSize': false,
+                'scrolling': 'no',
+                'width': 220,
+                'height': 42,
+                'minHeight': 50,
+                'afterClose': function () {
+                    location.hash = '';
+                },
+                'afterShow': function () {
+                    window.scrollTo(0, 0);
+                    $.fancybox.reposition();
+                    setTimeout(function () {
+                        $('#shippingModal input').focus();
+                    }, 2000);
+                }
+            }).click();
+        }
+    };
+    $(window).on('hashchange', shippingCalculatorFromHash);
+
+    $shippingParentForModal = $('<div style="display: none;"><div id="shippingModal" class="shippingModalParent" /></div>');
+    $('body').append($shippingParentForModal);
+    shippingCalculator($shippingParentForModal.find('#shippingModal'));
+
+    shippingCalculatorFromHash();
+    shippingCalculator($('.box-info-product'));
 });
 </script>

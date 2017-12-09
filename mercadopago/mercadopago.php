@@ -326,8 +326,8 @@ class MercadoPago extends PaymentModule
             ||
             ! $this->createTables()
             ||
-            !$this->registerHook('displayProductButtons')
-            ||
+            //!$this->registerHook('displayProductButtons')
+            //||
             !$this->registerHook('actionUpdateQuantity')
             ) {
             return false;
@@ -1332,6 +1332,8 @@ class MercadoPago extends PaymentModule
         if (!$this->active) {
             return;
         }
+
+        $this->context->controller->addJqueryPlugin('fancybox');
 
         return $this->display(__file__, '/views/templates/hook/display.tpl');
     }
