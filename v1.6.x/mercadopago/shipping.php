@@ -1,4 +1,20 @@
 <?php
+$expiration = 6000;
+
+$headers = apache_request_headers();
+header("Expires: " . gmdate('D, d M Y H:i:s \G\M\T', time() + $expiration));
+header("Last-Modified: ".gmdate("D, d M Y H:i:s", time())." GMT"); 
+
+if(isset($headers['If-Modified-Since'])) {
+  if(@strtotime($headers['If-Modified-Since']) > (time() - $expiration))
+  {
+    header('Not Modified',true,304);
+    exit;
+  }
+}
+header('Cache-Control: private, max-age='.$expiration);
+
+
 if (!defined('_PS_ROOT_DIR_')) {
     define('_PS_ROOT_DIR_', dirname(__FILE__).'/../../');
 }

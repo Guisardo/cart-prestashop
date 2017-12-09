@@ -22,6 +22,7 @@
 	*  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 	*  International Registered Trademark & Property of MercadoPago
 	*}
+	{if $statusOrder != "" || $showPoint == "true" || isset($status)}
 	<script defer type="text/javascript"
 	src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/js/jquery.dd.js"></script>
 	<div class="panel">
@@ -127,6 +128,12 @@
 				<li>
 					<span><strong class="dark">{l s='Estimated delivery final' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery_final|escape:'htmlall':'UTF-8'}
 				</li>
+				{if $status == "shipped"}
+				<li>
+					<span><strong class="dark">{l s='Seguimiento del envío' mod='mercadopago'}:</strong>&nbsp;</span>
+					<a target="_blank" href="https://www.correoargentino.com.ar/empresas/tyt/service.php?cliente=16276000&id={$tracking_number|escape:'htmlall':'UTF-8'}">{$tracking_number|escape:'htmlall':'UTF-8'}</a>
+				</li>
+				{/if}
 			</ul>
 
 		</div>
@@ -246,3 +253,4 @@
 	{/if}
 
 </script>
+{/if}
