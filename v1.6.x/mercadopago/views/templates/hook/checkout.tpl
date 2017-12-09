@@ -560,19 +560,24 @@ http://opensource.org/licenses/osl-3.0.php Open Software License (OSL
 	{if $standard_active eq 'true'}
 
 	<div class="row">
-		<div class="col-xs-12 col-md-6">
+		<div class="col-xs-12 col-md-12">
 			{if $window_type != 'iframe'} <a
 				href="{$standard_action_url|escape:'htmlall':'UTF-8'}" id="id-standard"
-				mp-mode="{$window_type|escape:'htmlall':'UTF-8'}" name="MP-Checkout">
-				<div class="mp-form hover">
+				mp-mode="{$window_type|escape:'htmlall':'UTF-8'}" name="MP-Checkout"
+				style="float: none;">
+				<div class="mp-form hover" style="width: 100%;">
 					<div class="row">
-						<div class="col">
-							<img
+						<div class="col-md-12">
+							<h3 style="margin-left: 11px; float: left; margin-top: 14px;"><b>Realizar Pago<b></b></b></h3>
+							<i class="icon-chevron-right" style="font-size: 25px;margin-top: 15px;text-align: right;margin-left: 10px;float: left;"></i>
+							<!--img
 								src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/payment_method_logo_120_31.png"
-								id="id-standard-logo"> <img
+								id="id-standard-logo"-->
+							<img
 								src="{$standard_banner|escape:'htmlall':'UTF-8'}"
-								class="mp-standard-banner" /> <span
-								class="payment-label standard"><h5> {$custom_text|unescape:'htmlall'}</h5> </span>
+								class="mp-standard-banner" style="width: auto; float: right; max-width: 95%;" />
+							<!--span
+								class="payment-label standard"><h5> {$custom_text|unescape:'htmlall'}</h5> </span-->
 						</div>
 					</div>
 				</div>

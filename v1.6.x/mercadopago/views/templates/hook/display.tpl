@@ -39,3 +39,4 @@
 
 {/if}
 
+{include file="$tpl_dir../../modules/mercadopago/views/templates/hook/shipping_calculator.tpl"}
