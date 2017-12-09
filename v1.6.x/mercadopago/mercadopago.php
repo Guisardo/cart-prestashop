@@ -56,11 +56,11 @@ class MercadoPago extends PaymentModule
     public static $countryOptions = array(
         'MLA' => array(
             'normal' => array(
-                'value' => 73328, 'label' => 'MercadoEnvios - OCA Estándar',
+                'value' => 73328, 'label' => 'MercadoEnvios - Estándar',
                 'description' => 'Después de la publicación, recibirá el producto en',
             ),
             'expresso' => array(
-                'value' => 73330, 'label' => 'MercadoEnvios - OCA Prioritario',
+                'value' => 73330, 'label' => 'MercadoEnvios - Prioritario',
                 'description' => 'Después de la publicación, recibirá el producto en',
             ),
         ),
