@@ -68,7 +68,8 @@
 			</div>
 		</div>
 	</section>
-	<section class="padding-1">
+	<br>
+<!-- 	<section class="padding-1">
 		<div class="container">
 			<div class="row">
 				<div class="col-xs-12 text-center">
@@ -78,7 +79,7 @@
 				</div>
 			</div>
 		</div>
-	</section>
+	</section> -->
 	<section class="bgblue2 padding-1">
 		<div class="container">
 			<div class="row">
@@ -237,7 +238,7 @@
 					<h6>{l s='More information' mod='mercadopago'}</h6>
 					<p>
 						<a target="_blank" href="mailto:comercial@mercadopago.com.br">comercial@mercadopago.com.br </a><br>
-						<a target="_blank" href="mailto:developers@mercadopago.com.br">developers@mercadopago.com.br </a>
+						<a target="_blank" href="mailto:modulos@mercadopago.com.br">modulos@mercadopago.com </a>
 					</p>
 				</div>
 			</div>

@@ -31,7 +31,7 @@ include_once 'MPRestCli.php';
 
 class MPApi
 {
-    const VERSION = '3.4.14';
+    const VERSION = '3.5.7';
 
     /* Info */
     const INFO = 1;
@@ -59,6 +59,26 @@ class MPApi
         $this->client_secret = $client_secret;
     }
 
+    /*
+     * getPaymentByOrder
+     */
+    public function getPaymentByOrder($external_reference)
+    {
+        $access_token = $this->getAccessToken();
+        $params = array(
+            'access_token' => $access_token,
+            'external_reference' => $external_reference,
+        );
+        $uri = "/v1/payments/search?";
+
+        $uri .= (strpos($uri, "?") === false) ? "?" : "&";
+        $uri .= $this->buildQuery($params);
+
+        $payment = MPRestCli::get($uri);
+
+        return $payment;
+    }
+
     /**
      * Get Access Token for API use
      */
@@ -76,8 +96,19 @@ class MPApi
             $access_data = MPRestCli::post('/oauth/token', $app_client_values, 'application/x-www-form-urlencoded');
 
             $this->access_data = $access_data['response'];
-
-            return $this->access_data['access_token'];
+            if (isset($access_data['response']['status']) &&
+                $access_data['response']['status'] > 201) {
+                UtilMercadoPago::logMensagem(
+                    $access_data['response']['message'],
+                    MPApi::ERROR,
+                    $access_data['response']['error'] . "==" . __CLASS__.'->'.__FUNCTION__.'@'.__LINE__,
+                    true,
+                    $app_client_values,
+                    '/oauth/token'
+                );
+            } else {
+                return $this->access_data['access_token'];
+            }
         }
         return null;
     }
@@ -110,6 +141,37 @@ class MPApi
         return trim(Configuration::get('MERCADOPAGO_ACCESS_TOKEN'));
     }
 
+    /**
+     * isValidPublicKey
+     * @param  $public_key
+     * @return boolean
+     */
+    public function isValidPublicKey($public_key)
+    {
+        $result = MPRestCli::get('/v1/payment_methods?public_key=' . $public_key);
+        if ($result != null && isset($result['status'])) {
+            if ($result['status'] > 202) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * isValidAccessToken
+     * @return boolean
+     */
+    public function isValidAccessToken($access_token)
+    {
+        $result = MPRestCli::get('/users/me?access_token=' . $access_token);
+        if ($result != null && isset($result['status'])) {
+            if ($result['status'] > 202) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /*
      * v0
      */
@@ -117,7 +179,6 @@ class MPApi
     {
         $access_token = $this->getAccessToken();
         $result = MPRestCli::get('/users/me?access_token=' . $access_token);
-
         return in_array('test_user', $result['response']['tags']);
     }
 
@@ -241,6 +302,20 @@ class MPApi
         return $payment_info;
     }
 
+    public function getPaymentsID($id_order) {
+        $payment_ids = array();
+        $result = $this->getPaymentByOrder($id_order);
+
+        error_log("==result===".Tools::jsonEncode($result));
+
+        if (isset($result ['response']['results'])) {
+            foreach ($result ['response']['results'] as $payments) {
+                $payment_ids[] = $payments['id'];
+            }
+        }
+        return $payment_ids;
+    }
+
     /**
      * Get information for specific payment
      *
@@ -303,6 +378,10 @@ class MPApi
                  $value['payment_type_id'] == 'debit_card' || $value['payment_type_id'] == 'prepaid_card') {
                 unset($result[$key]);
             }
+            if ($value['payment_type_id'] == 'bank_transfer' &&
+                Configuration::get('MERCADOPAGO_COUNTRY') == 'MCO') {
+                unset($result[$key]);
+            }
         }
         return $result;
     }
@@ -317,13 +396,38 @@ class MPApi
         $access_token = $this->getAccessTokenV1();
         $result = MPRestCli::get('/v1/payment_methods/?access_token=' . $access_token);
         $result = $result['response'];
-        // remove account_money
-        foreach ($result as $key => $value) {
-            if ($value['payment_type_id'] == 'ticket' ||
-                $value['payment_type_id'] == 'bank_transfer') {
-                unset($result[$key]);
+        if (isset($result['status']) != 201) {
+            // remove account_money
+            foreach ($result as $key => $value) {
+                if (isset($value['payment_type_id']) &&
+                    $value['payment_type_id'] == 'ticket' ||
+                    $value['payment_type_id'] == 'bank_transfer') {
+                    unset($result[$key]);
+                }
             }
         }
+
+        return $result;
+    }
+
+    /**
+     * Create a checkout preference
+     *
+     * @param array $preference
+     * @return array(json)
+     */
+    public function getPreference($preferences)
+    {
+        $access_token = $this->getAccessToken();
+        $uri = "/checkout/preferences/".$preferences;
+        $params = array();
+        $params["access_token"] = $access_token;
+
+        if (count($params) > 0) {
+            $uri .= (strpos($uri, "?") === false) ? "?" : "&";
+            $uri .= $this->buildQuery($params);
+        }
+        $result = MPRestCli::get($uri);
         return $result;
     }
 
@@ -402,8 +506,13 @@ class MPApi
 
         if ($customerResponse == null || $customerResponse["status"] != "200") {
             UtilMercadoPago::logMensagem(
-                'MercadoPago::createCustomerCard - Error: Doens\'t possibled to create the Customer',
-                MPApi::WARNING
+                'MercadoPago::createCustomerCard - '.
+                'Error: Doens\'t possibled to create the Customer',
+                MPApi::ERROR,
+                '',
+                false,
+                null,
+                "mercadopago->getContent"
             );
         }
         return $customerResponse;
@@ -521,12 +630,16 @@ class MPApi
         return $result;
     }
 
+    /*
+     * Send Error Log
+     */
     public static function sendErrorLog($code, $errors)
     {
         $data = array(
             "code" => $code,
             "module" => "PrestaShop",
-            "module_version" => "3.4.14",
+            "module_version" => MPApi::VERSION,
+            "email_admin" => Configuration::get('MERCADOPAGO_EMAIL_ADMIN'),
             "url_store" => $_SERVER['HTTP_HOST'],
             "errors" => $errors
         );

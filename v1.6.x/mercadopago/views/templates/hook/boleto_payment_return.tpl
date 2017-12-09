@@ -12,21 +12,40 @@ for more information. * * @author MercadoPago * @copyright Copyright
 (c) MercadoPago [http://www.mercadopago.com] * @license
 http://opensource.org/licenses/osl-3.0.php Open Software License (OSL
 3.0) * International Registered Trademark & Property of MercadoPago *}
+
+<style type="text/css">
+	
+	a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    text-decoration: none;
+    color: initial;
+}
+
+</style>
+
 <div class="mp-module">
 	<div class="return-div">
 		<h4 id="id-confirmation-boleto">
 			<strong> {l s='Thank you for your purchase! We are awaiting the payment.' mod='mercadopago'} <br> <br>
 			</strong>
-			<h5>
-				{l s='Payment Id (MercadoPago): ' mod='mercadopago'}
+			<p><strong>
+				{l s='Payment Id (MercadoPago): ' mod='mercadopago'}</strong>
 				{$payment_id|escape:'htmlall':'UTF-8'}<br>
-			</h5>
+			</p>
 	</div>
+	{if $boleto_url != null}
 	<br>
+	<div>
+		<a href="{$boleto_url|escape:'htmlall':'UTF-8'}" class="ch-btn ch-btn-big" target="_blank">{l s='Print ticket' mod='mercadopago'}</a>
+	</div>
+	{/if}
 	<div class="row">
 		{if $boleto_url != null}
-		<iframe src="{$boleto_url|escape:'htmlall':'UTF-8'}"
-			class="boleto-frame {$country|escape:'html':'UTF-8'}" id="boletoframe">
+		<iframe src="{$boleto_url|escape:'htmlall':'UTF-8'}" width="100%" height="600px"
+			id="boletoframe2" name="boletoframe2">
 			<div class="lightbox" id="text">
 				<div class="box">
 					<div class="content">
@@ -43,10 +62,10 @@ http://opensource.org/licenses/osl-3.0.php Open Software License (OSL
 	</div>
 </div>
 
-<script type="text/javascript">
+<!-- <script type="text/javascript">
   ModuleAnalytics.setPublicKey("TEST-a603f517-310f-4956-a00d-93519fc17647")
   ModuleAnalytics.setPaymentId("123456")
   ModuleAnalytics.setPaymentType("credit_card")
   ModuleAnalytics.setCheckoutType("basic")
   ModuleAnalytics.put()
-</script>
+</script> -->

@@ -26,20 +26,46 @@
 
 class UtilMercadoPago
 {
-    public static function logMensagem($mensagem, $nivel)
+
+    public static $statusMercadoPagoPresta = array(
+                                                'in_process' => 'MERCADOPAGO_STATUS_0',
+                                                'approved' => 'MERCADOPAGO_STATUS_1',
+                                                'cancelled' => 'MERCADOPAGO_STATUS_2',
+                                                'refunded' => 'MERCADOPAGO_STATUS_4',
+                                                'charged_back' => 'MERCADOPAGO_STATUS_5',
+                                                'in_mediation' => 'MERCADOPAGO_STATUS_6',
+                                                'pending' => 'MERCADOPAGO_STATUS_7',
+                                                'rejected' => 'MERCADOPAGO_STATUS_3',
+                                                'ready_to_ship' => 'MERCADOPAGO_STATUS_8',
+                                                'shipped' => 'MERCADOPAGO_STATUS_9',
+                                                'delivered' => 'MERCADOPAGO_STATUS_10',
+                                                'waiting_POS' => 'MERCADOPAGO_STATUS_11',
+                                                'started' => 'MERCADOPAGO_STATUS_12'
+                                            );
+
+    public static function logMensagem($message, $nivel, $exceptionMessage, $logApi, $data, $methodOrUri)
     {
-        $version = UtilMercadoPago::getPrestashopVersion();
-        $data_hora = date("F j, Y, g:i a");
-        if ($version >= 6) {
-            PrestaShopLogger::addLog(
-                $data_hora."===".$mensagem,
-                $nivel,
-                0,
-                'MercadoPago',
-                null,
-                true
+        UtilMercadoPago::log($message, $exceptionMessage);
+
+        if ($logApi) {
+            $errors = array(
+                "endpoint" => $methodOrUri,
+                "message" => $message,
+                "payloads" => $data
             );
+            MPApi::sendErrorLog($nivel, $errors);
         }
+    }
+
+    /*
+    User Errors...
+    */
+    public static function log($msg, $exceptionMessage)
+    {
+        $date = date('d.m.Y h:i:s');
+        $log = "Date:  ".$date."  | ".$msg.
+        "|  Exception:  " . $exceptionMessage . "\n";
+        error_log($log, 3, _PS_ROOT_DIR_ . '/modules/mercadopago/logs/mercadopago.log');
     }
 
     public static function getPrestashopVersion()
@@ -139,7 +165,6 @@ class UtilMercadoPago
         if (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLB') {
             $value = str_replace('-', '', $value);
         } elseif (Configuration::get('MERCADOPAGO_COUNTRY') == 'MLA') {
-            error_log('==postcode===' . preg_replace("/[^0-9,.]/", "", $value));
             $value = preg_replace("/[^0-9,.]/", "", $value);
         }
         return $value;
@@ -162,5 +187,14 @@ class UtilMercadoPago
             }
         }
         return $color + $size;
+    }
+
+    public static function getIsoCodeStateById($id_state)
+    {
+        $result = Db::getInstance()->getRow('
+        SELECT s.`iso_code` AS iso_code
+        FROM `'._DB_PREFIX_.'state` s
+        WHERE s.`id_state` = '.(int)$id_state);
+        return isset($result['iso_code']) ? $result['iso_code'] : false;
     }
 }
