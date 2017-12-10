@@ -22,7 +22,7 @@
 	*  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 	*  International Registered Trademark & Property of MercadoPago
 	*}
-	{if $statusOrder != "" || $showPoint == "true" || isset($status)}
+{if $statusOrder != "" || $showPoint == "true" || isset($status)}
 	<script defer type="text/javascript"
 	src="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/js/jquery.dd.js"></script>
 	<div class="panel">
@@ -79,7 +79,6 @@
 				<button type="button" name="payment_pos_cancel_action" id="payment_pos_cancel_action" class="btn btn-danger">{l s='Cancel payment' mod='mercadopago'}</button>
 			</div>
 			{/if}
-	</div>
 	<br>
 	{if isset($status)}
 	<div id="formAddPaymentPanel" class="panel">
@@ -114,42 +113,12 @@
 				<strong>{l s='The tag is pending' mod='mercadopago'}</strong><br>
 			</p>
 		{else}
-			<strong>{$substatus_description|escape:'htmlall':'UTF-8'}</strong><br>
+			<p class="alert alert-danger">
+				{l s='Warning' mod='mercadopago'}
+				<strong>{$substatus_description|escape:'htmlall':'UTF-8'}</strong><br>
+			</p>
 		{/if}
 		<br>
-{if isset($status)}
-		<div id="formAddPaymentPanel" class="panel">
-			<div class="panel-heading">
-				<i class="icon-truck"></i>
-				MercadoEnvios - {l s='Track your delivery' mod='mercadopago'}
-			</div>
-
-			{if $substatus == "ready_to_print"}
-				<p class="alert alert-warning">
-					{l s='Warning' mod='mercadopago'}
-					<strong>{l s='Tag ready to print' mod='mercadopago'}</strong><br>
-					<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
-					&nbsp;
-					<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
-				</p>
-			{else if $substatus == "printed"}
-				<p class="alert alert-success">
-					{l s='Warning' mod='mercadopago'}
-					<strong>{l s='Tag printed' mod='mercadopago'}</strong><br>
-					<a href="#" onClick="window.open('{$tag_shipment|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag PDF' mod='mercadopago'}</span></a>
-					&nbsp;
-					<a href="#" onClick="window.open('{$tag_shipment_zebra|escape:'htmlall':'UTF-8'}', '_blank')" class="button btn btn-info button-medium">
-					<span><i class="icon-ticket"></i>&nbsp;{l s='Open Tag for printer' mod='mercadopago'}</span></a>
-				</p>
-			{else}
-				<p class="alert alert-danger">
-					{l s='Warning' mod='mercadopago'}
-					<strong>{$substatus_description|escape:'htmlall':'UTF-8'}</strong><br>
-				</p>
-			{/if}
 			 <ul>
 				<li>
 					<span><strong class="dark">{l s='Status of delivery' mod='mercadopago'}:</strong>&nbsp;</span>{$status|escape:'htmlall':'UTF-8'}
@@ -178,8 +147,9 @@
 			</ul>
 
 		</div>
-{/if}
 	</div>
+	</div>
+{/if}
 
 <!-- 			$.ajax({
 				type : "GET",

@@ -448,7 +448,9 @@ class MercadoPago extends PaymentModule
             Configuration::get('MERCADOPAGO_CARRIER'),
             true
         );
-
+        if ($id_carrier == 52 || $id_carrier == 46) {
+            $id_carrier = 54;
+        }
         $id_mercadoenvios_service_code = 0;
         if (isset($lista_shipping['MP_CARRIER']) &&
             array_key_exists($id_carrier, $lista_shipping['MP_CARRIER'])) {
