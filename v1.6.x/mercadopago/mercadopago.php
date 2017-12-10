@@ -253,7 +253,7 @@ class MercadoPago extends PaymentModule
                     $order_state->send_email = $value[3][1];
                 }
                 if ($value[2] == "started") {
-                    $order_state->logable = "false";
+                    $order_state->logable = 0;
                 } else {
                     $order_state->logable = $value[3][4];
                 }
@@ -635,6 +635,10 @@ class MercadoPago extends PaymentModule
                PRIMARY KEY  (`mercadopago_orders_id`)
             ) ENGINE=". _MYSQL_ENGINE_ .
             ' DEFAULT CHARSET=utf8  auto_increment=1;';
+
+        if (! Db::getInstance()->Execute($sql)) {
+            return false;
+        }
 
         $sql = " CREATE TABLE IF NOT EXISTS " . _DB_PREFIX_ .  "mercadopago_orders_initpoint (
               `mercadopago_orders_id` int(11) unsigned NOT NULL auto_increment,
@@ -3063,12 +3067,12 @@ class MercadoPago extends PaymentModule
             true
         );
 
-        $delivery_option_list = $this->context->smarty->tpl_vars['delivery_option_list'];
+        $delivery_option_list = $this->context->cart->getDeliveryOptionList();
         $retornoCalculadora = $this->calculateListCache(UtilMercadoPago::getCodigoPostal($address->postcode));
 
         $mpCarrier = $lista_shipping['MP_SHIPPING'];
 
-        foreach ($delivery_option_list->value as $id_address) {
+        foreach ($delivery_option_list as $id_address) {
             foreach ($id_address as $key) {
                 foreach ($key['carrier_list'] as $id_carrier) {
                     if (in_array($id_carrier['instance']->id, $mpCarrier)) {
