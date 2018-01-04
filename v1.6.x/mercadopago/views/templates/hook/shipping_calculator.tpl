@@ -36,7 +36,7 @@
 </script>
 <script type="text/template" id="shippingCPA">
 <li>
-Consultá tu Código Postal <u><a target="_blank" href="http://wxw.oca.com.ar/Contenidos_Dinamicos/cpa.asp" onclick="window.open(this.href,'','toolbar=0,status=0,width=380,height=286');return false;">acá</a></u>
+Consultá tu Código Postal <u><a target="_blank" href="https://www3.oca.com.ar/Buscadores/cpa.asp" onclick="window.open(this.href,'','toolbar=0,status=0,width=380,height=286');return false;">acá</a></u>
 </li>
 </script>
 <script type="text/template" id="shippingOption">
