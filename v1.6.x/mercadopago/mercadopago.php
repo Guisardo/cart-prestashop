@@ -2898,8 +2898,52 @@ class MercadoPago extends PaymentModule
             }
 
             $statusPS = (int)$order->getCurrentState();
-            $payment_status = Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta[$payment_status]);
-            if ($payment_status != $statusPS) {
+            $shouldChangeStatus = false;
+            $ignoreOrders = array(
+                490,
+                643,
+                678,
+                694,
+                718,
+                731,
+                746,
+                781,
+                811,
+                980,
+                1025,
+                1030,
+                1033,
+                1083,
+                1089,
+                1110
+            );
+
+            if (!in_array($id_order, $ignoreOrders)) {
+                if ($statusPS === Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['shipped']) &&
+                        $payment_status === 'delivered') {
+                    // shipped only can be changed by delivered
+                    $shouldChangeStatus = true;
+                } elseif ($statusPS === 6 && ($payment_status === 'approved' || $payment_status === 'ready_to_ship')) {
+                    // cancelled orders only can be changed by approved or ready_to_ship
+                    $shouldChangeStatus = true;
+                } elseif (!($statusPS === Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['ready_to_ship']) &&
+                        $payment_status === 'approved')) {
+                    // if not trying to approve a ready_to_ship, evaluate the rest of mp states
+                    foreach (UtilMercadoPago::$statusMercadoPagoPresta as $key => $value) {
+                        if ($key !== 'shipped' && $key !== 'delivered') { //shipped and delivered should not be changed by lower statuses
+                            if ($statusPS == Configuration::get($value)) {
+                                $shouldChangeStatus = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($shouldChangeStatus) {
+                $payment_status = Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta[$payment_status]);
+                PrestaShopLogger::addLog("=====NOTIF payment_status=====".$payment_status, MPApi::ERROR, 0);
+                PrestaShopLogger::addLog("=====NOTIF statusPS=====".$statusPS, MPApi::ERROR, 0);
                 $order->setCurrentState($payment_status);
             }
 
