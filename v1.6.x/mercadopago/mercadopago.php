@@ -561,7 +561,7 @@ class MercadoPago extends PaymentModule
         if ($id_mercadoenvios_service_code > 0) {
             $order_payments = $order->getOrderPayments();
             foreach ($order_payments as $order_payment) {
-                $result = $this->mercadopago->getPaymentStandard($order_payment->transaction_id);
+                $result = $this->mercadopago->getPaymentStandard(trim(explode(' / ', $order_payment->transaction_id)[0]));
                 if ($result['status'] == '200') {
                     $payment_info = $result['response'];
                     if (isset($payment_info['collection'])) {
@@ -748,10 +748,10 @@ class MercadoPago extends PaymentModule
             } else {
                 $order_payments = $order->getOrderPayments();
                 foreach ($order_payments as $order_payment) {
-                    $result = $this->mercadopago->getPayment($order_payment->transaction_id);
+                    $result = $this->mercadopago->getPayment(trim(explode(' / ', $order_payment->transaction_id)[0]));
 
                     if ($result['status'] == '404' || $result['status'] == '401') {
-                        $result = $this->mercadopago->getPaymentStandard($order_payment->transaction_id);
+                        $result = $this->mercadopago->getPaymentStandard(trim(explode(' / ', $order_payment->transaction_id)[0]));
 
                         $result_merchant = $this->mercadopago->getMerchantOrder(
                             $result['response']['collection']['merchant_order_id']
@@ -807,9 +807,9 @@ class MercadoPago extends PaymentModule
         $settings = null;
         $order_payments = $order->getOrderPayments();
         foreach ($order_payments as $order_payment) {
-            $result = $this->mercadopago->getPayment($order_payment->transaction_id);
+            $result = $this->mercadopago->getPayment(trim(explode(' / ', $order_payment->transaction_id)[0]));
             if ($result['status'] == '404' || $result['status'] == '401') {
-                $result = $this->mercadopago->getPaymentStandard($order_payment->transaction_id);
+                $result = $this->mercadopago->getPaymentStandard(trim(explode(' / ', $order_payment->transaction_id)[0]));
             }
             if ($result['status'] == 200) {
                 if (isset($result['response']['collection'])) {
@@ -2871,9 +2871,9 @@ class MercadoPago extends PaymentModule
             if ($payment_status == 'shipped') {
                 $order_payments = $order->getOrderPayments();
                 foreach ($order_payments as $order_payment) {
-                    $result = $this->mercadopago->getPayment($order_payment->transaction_id);
+                    $result = $this->mercadopago->getPayment(trim(explode(' / ', $order_payment->transaction_id)[0]));
                     if ($result['status'] == '404' || $result['status'] == '401') {
-                        $result = $this->mercadopago->getPaymentStandard($order_payment->transaction_id);
+                        $result = $this->mercadopago->getPaymentStandard(trim(explode(' / ', $order_payment->transaction_id)[0]));
 
                         $result_merchant = $this->mercadopago->getMerchantOrder(
                             $result['response']['collection']['merchant_order_id']
