@@ -41,16 +41,82 @@ if (Context::getContext()->customer->logged && !$zip_code) {
 header('Content-Type: application/json');
 if ($zip_code) {
 
-    $paramsMP = array(
-        "dimensions" => "30x30x30,500",
-        "zip_code" => $zip_code,
-        "item_price"=> "100.58",
-        'free_method' => '', // optional
-    );
+    if (in_array($zip_code, array(
+        '9410',
+        '9411',
+        '9420',
+        '9421'
+    ))) {
+        echo '{
+    "custom_message": {
+        "display_mode": null,
+        "reason": ""
+    },
+    "options": [
+        {
+            "tags": [],
+            "id": 386467783,
+            "estimated_delivery_time": {
+                "unit": "hour",
+                "shipping": 24,
+                "schedule": null,
+                "pay_before": null,
+                "time_frame": {
+                    "to": null,
+                    "from": null
+                },
+                "offset": {
+                    "shipping": 24,
+                    "date": "2018-01-17T00:00:00.000-03:00"
+                },
+                "date": "2018-01-16T00:00:00.000-03:00",
+                "type": "known_frame",
+                "handling": 24
+            },
+            "list_cost": "300 aprox.",
+            "currency_id": "ARS",
+            "shipping_option_type": "address",
+            "shipping_method_type": "standard",
+            "name": "Normal a domicilio",
+            "display": "recommended",
+            "cost": "300 aprox.",
+            "discount": {
+                "promoted_amount": 0,
+                "rate": 0,
+                "type": "none"
+            },
+            "shipping_method_id": 73328
+        }
+    ],
+    "destination": {
+        "zip_code": "'.$zip_code.'",
+        "extended_attributes": null,
+        "state": {
+            "id": "AR-T",
+            "name": "Tierra del Fuego"
+        },
+        "country": {
+            "id": "AR",
+            "name": "Argentina"
+        },
+        "city": {
+            "id": null,
+            "name": null
+        }
+    }
+}';
+    } else {
+        $paramsMP = array(
+            "dimensions" => "30x30x30,500",
+            "zip_code" => $zip_code,
+            "item_price"=> "100.58",
+            'free_method' => '', // optional
+        );
 
-    $response = $mp->calculateEnvios($paramsMP);
+        $response = $mp->calculateEnvios($paramsMP);
 
-    echo json_encode($response['response'], JSON_PRETTY_PRINT);
+        echo json_encode($response['response'], JSON_PRETTY_PRINT);
+    }
 } else {
     echo '{}';
 }
