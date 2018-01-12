@@ -2919,16 +2919,22 @@ class MercadoPago extends PaymentModule
             );
 
             if (!in_array($id_order, $ignoreOrders)) {
-                if ($statusPS === Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['shipped']) &&
-                        $payment_status === 'delivered') {
-                    // shipped only can be changed by delivered
-                    $shouldChangeStatus = true;
-                } elseif ($statusPS === 6 && ($payment_status === 'approved' || $payment_status === 'ready_to_ship')) {
-                    // cancelled orders only can be changed by approved or ready_to_ship
-                    $shouldChangeStatus = true;
-                } elseif (!($statusPS === Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['ready_to_ship']) &&
-                        $payment_status === 'approved')) {
-                    // if not trying to approve a ready_to_ship, evaluate the rest of mp states
+                if ($statusPS == 6) {
+                    if ($payment_status === 'approved' || $payment_status === 'ready_to_ship') {
+                        // cancelled orders only can be changed by approved or ready_to_ship
+                        $shouldChangeStatus = true;
+                    }
+                } elseif ($statusPS == Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['shipped'])) {
+                    if ($payment_status === 'delivered') {
+                        // shipped only can be changed by delivered
+                        $shouldChangeStatus = true;
+                    }
+                } elseif ($statusPS == Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta['ready_to_ship'])) {
+                    if ($payment_status === 'shipped') {
+                        // ready_to_ship only can be changed by shipped
+                        $shouldChangeStatus = true;
+                    }
+                } else {
                     foreach (UtilMercadoPago::$statusMercadoPagoPresta as $key => $value) {
                         if ($key !== 'shipped' && $key !== 'delivered') { //shipped and delivered should not be changed by lower statuses
                             if ($statusPS == Configuration::get($value)) {
@@ -2940,11 +2946,11 @@ class MercadoPago extends PaymentModule
                 }
             }
 
-            if ($shouldChangeStatus) {
-                $payment_status = Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta[$payment_status]);
-                PrestaShopLogger::addLog("=====NOTIF payment_status=====".$payment_status, MPApi::ERROR, 0);
-                PrestaShopLogger::addLog("=====NOTIF statusPS=====".$statusPS, MPApi::ERROR, 0);
+            $payment_status = Configuration::get(UtilMercadoPago::$statusMercadoPagoPresta[$payment_status]);
+            if ($shouldChangeStatus && $statusPS != $payment_status) {
                 $order->setCurrentState($payment_status);
+                PrestaShopLogger::addLog("=====NOTIF payment_status=====".json_encode($payment_status), MPApi::ERROR, 0);
+                PrestaShopLogger::addLog("=====NOTIF statusPS=====".json_encode($statusPS), MPApi::ERROR, 0);
             }
 
             try {
