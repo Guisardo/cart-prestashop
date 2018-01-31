@@ -32,9 +32,9 @@ $mp = new MPApi(
 $zip_code = $_GET['z'];
 if (Context::getContext()->customer->logged && !$zip_code) {
     $cart = Context::getContext()->cart;
-    if ($cart->id_address_invoice) {
-        $address_invoice = new Address((integer) $cart->id_address_invoice);
-        $zip_code = $address_invoice->postcode;
+    if ($cart->id_address_delivery) {
+        $address_delivery = new Address((integer) $cart->id_address_delivery);
+        $zip_code = $address_delivery->postcode;
     }
 }
 
@@ -73,13 +73,13 @@ if ($zip_code) {
                 "type": "known_frame",
                 "handling": 24
             },
-            "list_cost": "300 aprox.",
+            "list_cost": "335 aprox.",
             "currency_id": "ARS",
             "shipping_option_type": "address",
             "shipping_method_type": "standard",
             "name": "Normal a domicilio",
             "display": "recommended",
-            "cost": "300 aprox.",
+            "cost": "335 aprox.",
             "discount": {
                 "promoted_amount": 0,
                 "rate": 0,
