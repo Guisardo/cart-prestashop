@@ -26,7 +26,7 @@
 <div class="shippingContainer">
     <div style="width: 220px; margin: 0 auto;">
         <img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/img/shipper.png" style="width: 30px; float: left; margin-left: 7px;">
-        <ul style="text-align: right; margin-right: 7px;">
+        <ul style="text-align: right; margin-right: 7px; width: 176px; display: inline-block;">
             <li style="margin-right: -2px;">Costo total de envío a:
                 <input type="text" style="width: 40px; text-align: center;" placeholder="CP" title="Código Postal"></input>
             </li>
@@ -35,8 +35,8 @@
 </div>
 </script>
 <script type="text/template" id="shippingCPA">
-<li>
-Consultá tu Código Postal <u><a target="_blank" href="https://www3.oca.com.ar/Buscadores/cpa.asp" onclick="window.open(this.href,'','toolbar=0,status=0,width=380,height=286');return false;">acá</a></u>
+<li style="white-space: nowrap; float: right;">
+Consultá tu Código Postal <u><a href="/costos-envio">acá</a></u>
 </li>
 </script>
 <script type="text/template" id="shippingOption">
@@ -47,7 +47,7 @@ $(document).ready(function() {
     var shippingOptionsTpl = $('#shippingCalculator').text();
     var shippingCPATpl = $('#shippingCPA').text();
     var shippingOptionTpl = $('#shippingOption').text();
-    var shippingCalculator = function ($calculator_parent) {
+    window.shippingCalculator = function ($calculator_parent, $callback) {
         var $shippingOptions = false;
         var updateShippingCost = function(_shippingOptions) {
             var _oldCP = '';
@@ -114,6 +114,9 @@ $(document).ready(function() {
             }
             $.getJSON('/modules/mercadopago/shipping.php', _data).success(function(resp) {
                 updateShippingCost(resp);
+                if ($callback) {
+                    $callback(resp);
+                }
             });
         }
         delayedCheck();
