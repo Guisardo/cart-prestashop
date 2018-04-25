@@ -442,7 +442,7 @@ class MercadoPago extends PaymentModule
         }
     }
 
-    private function isMercadoEnvios($id_carrier)
+    public function isMercadoEnvios($id_carrier)
     {
         $lista_shipping = (array) Tools::jsonDecode(
             Configuration::get('MERCADOPAGO_CARRIER'),
@@ -839,7 +839,7 @@ class MercadoPago extends PaymentModule
         return $settings;
     }
 
-    private function setTracking($order, $shipments, $update)
+    public function setTracking($order, $shipments, $update)
     {
         $shipment_id = null;
         $retorno = null;
