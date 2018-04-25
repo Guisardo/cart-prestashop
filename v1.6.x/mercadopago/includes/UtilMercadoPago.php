@@ -110,7 +110,6 @@ class UtilMercadoPago
         }
 
         if (Configuration::get('MERCADOENVIOS_ACTIVATE') == 'true') {
-            error_log("Mercado envios ativado");
             $sql = "SELECT id_product
             FROM "._DB_PREFIX_."product WHERE (width = 0 OR height = 0
             OR depth = 0
@@ -120,11 +119,8 @@ class UtilMercadoPago
             AND active =1;";
 
             $dados = Db::getInstance()->executeS($sql);
-            if ($dados) {
-                $requirements['dimensoes'] = 'negative';
-            } else {
-                $requirements['dimensoes'] = 'positive';
-            }
+
+            $requirements['dimensoes'] = $dados ? 'negative' : 'positive';
         }
 
         $requirements['ssl'] = Configuration::get('PS_SSL_ENABLED') == 0 ? "negative" : "positive";
@@ -175,8 +171,6 @@ class UtilMercadoPago
         $color  = "";
         $size  = "";
         foreach ($combinations as $value) {
-            error_log('==group_name===' . $value['group_name']);
-            error_log('==attribute_name===' . $value['attribute_name']);
             if ($value['group_name'] == 'Color') {
                 $color = ' Color = ' .$value['attribute_name']. ' ';
                 continue;
