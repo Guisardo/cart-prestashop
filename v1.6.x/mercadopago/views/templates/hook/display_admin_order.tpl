@@ -138,12 +138,10 @@
 				<li>
 					<span><strong class="dark">{l s='Estimated delivery final' mod='mercadopago'}:</strong>	&nbsp;</span>{$estimated_delivery_final|escape:'htmlall':'UTF-8'}
 				</li>
-				{if $status == "shipped"}
 				<li>
 					<span><strong class="dark">{l s='Seguimiento del envío' mod='mercadopago'}:</strong>&nbsp;</span>
-					<a target="_blank" href="https://www.correoargentino.com.ar/empresas/tyt/service.php?cliente=16276000&id={$tracking_number|escape:'htmlall':'UTF-8'}">{$tracking_number|escape:'htmlall':'UTF-8'}</a>
+					<a target="_blank" href="{$tracking_link|escape:'htmlall':'UTF-8'}">{$tracking_number|escape:'htmlall':'UTF-8'}</a>
 				</li>
-				{/if}
 			</ul>
 
 		</div>

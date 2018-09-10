@@ -92,8 +92,8 @@
 	            </div>
 	            <div class="col-md-4 hide" style="margin-top: 15px; margin-bottom: 15px;" id="shipping_cost">
 	            	<div style="width: 235px; margin: 0 auto;" class="text-center">
-					    <img src="{$this_path_ssl|escape:'htmlall':'UTF-8'}/modules/mercadopago/views/img/shipper.png" style="width: 30px; float: left; margin-left: 7px;">
-					    <h2 class="text-center" style="float: left; padding-left: 52px; margin-top: -60px;">
+					    <img src="{$this_path_ssl|escape:'htmlall':'UTF-8'}/modules/mercadopago/views/img/shipper.png" style="width: 30px; display: block; margin-left: 7px;">
+					    <h2 class="text-center" style="padding-left: 52px; margin-top: -60px;">
 					    	<span class="hide">{l s='Costo de envío del pedido:' mod='mercadopago'}</span> <span class="hide" style="display: inline-block;"></span>
 					    	<span>{l s='Elija un código postal para calcular el envío' mod='mercadopago'}</span>
 					    </h2>

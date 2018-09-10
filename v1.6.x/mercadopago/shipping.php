@@ -73,13 +73,13 @@ if ($zip_code) {
                 "type": "known_frame",
                 "handling": 24
             },
-            "list_cost": "335 aprox.",
+            "list_cost": "385 aprox.",
             "currency_id": "ARS",
             "shipping_option_type": "address",
             "shipping_method_type": "standard",
             "name": "Normal a domicilio",
             "display": "recommended",
-            "cost": "335 aprox.",
+            "cost": "385 aprox.",
             "discount": {
                 "promoted_amount": 0,
                 "rate": 0,
@@ -107,10 +107,11 @@ if ($zip_code) {
 }';
     } else {
         $paramsMP = array(
-            "dimensions" => "30x30x30,500",
+            "dimensions" => "7x28x21,1",
             "zip_code" => $zip_code,
             "item_price"=> "100.58",
             'free_method' => '', // optional
+            "default_shipping_method" => 501045
         );
 
         $response = $mp->calculateEnvios($paramsMP);
