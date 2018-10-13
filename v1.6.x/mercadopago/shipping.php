@@ -30,8 +30,8 @@ $mp = new MPApi(
         );
 
 $zip_code = $_GET['z'];
+$cart = Context::getContext()->cart;
 if (Context::getContext()->customer->logged && !$zip_code) {
-    $cart = Context::getContext()->cart;
     if ($cart->id_address_delivery) {
         $address_delivery = new Address((integer) $cart->id_address_delivery);
         $zip_code = $address_delivery->postcode;
@@ -116,7 +116,34 @@ if ($zip_code) {
 
         $response = $mp->calculateEnvios($paramsMP);
 
-        echo json_encode($response['response'], JSON_PRETTY_PRINT);
+        $shipping_options = json_encode($response['response'], JSON_PRETTY_PRINT);
+
+        $shipping_options = $response['response'];
+
+        $sql = "
+select id_zone from "._DB_PREFIX_."cpa_cp_1974_shipping_zone
+where cod_postal = ".$zip_code."
+        ";
+        $id_zone = Db::getInstance()->getValue($sql);
+        $shipping_options['id_zone'] = $id_zone;
+
+        if ($id_zone) {
+            $result = Carrier::getCarriers((int)Configuration::get('PS_LANG_DEFAULT'), true, false, (int)$id_zone);
+
+            foreach ($result as $carrier) {
+                if (strpos($carrier['name'], "MercadoEnv", 0) === false) {
+                    $carrier_options = (array) $carrier;
+                    $carrier_obj = new Carrier((int)$carrier['id_carrier'])
+                    $carrier_options['cost'] = (($carrier['shipping_method'] == Carrier::SHIPPING_METHOD_FREE) ? 0 : $carrier_obj->getDeliveryPriceByWeight(1, (int)$id_zone));
+                    $carrier_options['img'] = file_exists(_PS_SHIP_IMG_DIR_.(int)$carrier['id_carrier'].'.jpg') ? _THEME_SHIP_DIR_.(int)$carrier['id_carrier'].'.jpg' : '';
+
+                    $shipping_options['options'][] = $carrier_options;
+                }
+            }
+
+        }
+
+        echo json_encode($shipping_options, JSON_PRETTY_PRINT);
     }
 } else {
     echo '{}';

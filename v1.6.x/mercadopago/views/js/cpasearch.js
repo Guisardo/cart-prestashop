@@ -25,7 +25,7 @@ $(function() {
 		$pnl_results.find('.col-md-4:eq(1)').removeClass('hide');
 
 		$shipping_cost.find('h2 span:eq(2)').removeClass('hide');
-		$shipping_cost.find('h2 span:lt(2)').addClass('hide');
+		$shipping_cost.find('h2 span:lt(2), h2 ul').addClass('hide');
 		if ($result_list.find('[data-parent="' + $this.text() + '"]').length === 1) {
 			$result_list.find('[data-parent="' + $this.text() + '"]:eq(0)').click();
 		} else {
@@ -46,7 +46,7 @@ $(function() {
 		$result_list.empty();
 		$dd_substates.find('ul').empty();
 		$shipping_cost.find('h2 span:eq(2)').removeClass('hide');
-		$shipping_cost.find('h2 span:lt(2)').addClass('hide');
+		$shipping_cost.find('h2 span:lt(2), h2 ul').addClass('hide');
 		$frm_search.find('span.label-warning').addClass('hide');
 		$pnl_results.find('.col-md-4').addClass('hide');
 
@@ -169,15 +169,23 @@ $(function() {
 		$this.removeClass('inactive').addClass('active').removeClass('btn-default').addClass('btn-success');
 
 		$shipping_cost.find('h2 span:eq(2)').addClass('hide');
-		$shipping_cost.find('h2 span:lt(2)').removeClass('hide');
+		$shipping_cost.find('h2 span:lt(2), h2 ul').removeClass('hide');
 
         $.getJSON('/modules/mercadopago/shipping.php', {
         	z: $this.data('code')
         }).success(function(resp) {
         	if (resp.options && resp.options.length > 0) {
-				$shipping_cost.css({
+				$ul = $shipping_cost.css({
 					visibility: 'visible'
-				}).find('h2 span:eq(1)').text(resp.options[0].list_cost);
+				}).find('h2 ul');
+
+				shipping_options = resp.options.sort(function(a, b) {
+					return alphanumCase(a.list_cost.toString(), b.list_cost.toString());
+				});
+				$(shipping_options).each(function() {
+					$ul.append('<li style="vertical-align: middle;padding: 5px;"><span style="vertical-align: middle;margin-right: 5px;">$ ' + (this.list_cost*1.0).toFixed(2).toString().replace('.', ',') + '</span><img src="' + this.img + '" height="23"></li>');
+				});
+
 				setTimeout(function() {
 				    $('html, body').animate({
 				    	scrollTop: $('#shipping_cost').offset().top - 40
@@ -201,15 +209,15 @@ $(function() {
 		$pnl_results.find('.col-md-4:eq(2)').removeClass('hide');
 	}
 	var getCoordinates = function(place, cb) {
-		$.getJSON('https://maps.google.com/maps/api/geocode/json?' +
-			'address=' + place + '&key=AIzaSyDNYEIQjPAwSIx9ZmKMa7Lr9Yr2lCGnuQo').success(function(geoInfo) {
-				if (geoInfo['results'].length === 0) {
-					var placeSplit = place.split(', ');
-					place = placeSplit.slice(1, placeSplit.length - 1).join(', ');
-					getCoordinates(place, cb);
-				} else {
-					cb(geoInfo['results'][0]['geometry']['location']['lat'] + ',' + geoInfo['results'][0]['geometry']['location']['lng']);
-				}
-			});
+		var geocoder = new google.maps.Geocoder();
+		geocoder.geocode({'address': place}, function (results, status) {
+			if (results.length === 0) {
+				var placeSplit = place.split(', ');
+				place = placeSplit.slice(1, placeSplit.length - 1).join(', ');
+				getCoordinates(place, cb);
+			} else {
+				cb(results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng());
+			}
+		});
 	};
 }());

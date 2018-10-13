@@ -13,7 +13,7 @@
 *
 * DISCLAIMER
 *
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+* Do not edit or add to this file if you wish to upgrade PrestaShop to newer	
 * versions in the future. If you wish to customize PrestaShop for your
 * needs please refer to http://www.prestashop.com for more information.
 *
@@ -22,6 +22,7 @@
 *  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *  International Registered Trademark & Property of MercadoPago
 *}
+<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGZ9Acw-CKIHL1kddrRwG4dn2JG5jJwko&"></script>
 <link rel="stylesheet" href="{$this_path_ssl|escape:'htmlall':'UTF-8'}modules/mercadopago/views/css/cpasearch.css" type="text/css" media="all" />
 <div class="section">
   <div class="container">
@@ -103,7 +104,7 @@
 					</div>
 	            </div>
 	            <div class="col-md-4 hide">
-	              <img style="margin: 0 auto;" class="center-block img-circle img-responsive" data-mapurl="https://maps.googleapis.com/maps/api/staticmap?center=Argentina&amp;key=AIzaSyDNYEIQjPAwSIx9ZmKMa7Lr9Yr2lCGnuQo&amp;zoom=9&amp;size=200x200&amp;sensor=false" src="https://www.googleapis.com/maps/api/staticmap?center=Argentina&amp;key=AIzaSyDNYEIQjPAwSIx9ZmKMa7Lr9Yr2lCGnuQo&amp;zoom=3&amp;size=200x200&amp;sensor=false">
+	              <img style="margin: 0 auto;" class="center-block img-circle img-responsive" data-mapurl="https://maps.googleapis.com/maps/api/staticmap?center=Argentina&amp;key=AIzaSyBGZ9Acw-CKIHL1kddrRwG4dn2JG5jJwko&amp;zoom=9&amp;size=200x200&amp;sensor=false" src="https://maps.googleapis.com/maps/api/staticmap?center=Argentina&amp;key=AIzaSyBGZ9Acw-CKIHL1kddrRwG4dn2JG5jJwko&amp;zoom=3&amp;size=200x200&amp;sensor=false">
 	            </div>
 	          </div>
 	      </div>
